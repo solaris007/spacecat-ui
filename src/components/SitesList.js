@@ -185,7 +185,7 @@ const SitesList = () => {
     console.log('Creating site with data:', siteData);
     try {
       const newSite = await createSite(siteData);
-      sites.reload();
+      sites.insert(newSite.id, newSite);
       ToastQueue.positive(`Site ${newSite.id} created`, { timeout: 5000 });
     } catch (error) {
       console.log('Error creating site:', error);
@@ -200,10 +200,10 @@ const SitesList = () => {
     try {
       for (const siteId of selectedKeys) {
         await deleteSite(siteId);
+        sites.remove(siteId);
       }
       clearTableSelections();
       ToastQueue.positive(`Successfully deleted ${selectedKeys.size} site(s)`, { timeout: 5000 });
-      sites.reload();
     } catch (error) {
       console.log('Error deleting site(s):', error);
       ToastQueue.negative('Error deleting site(s)', { timeout: 5000 });
@@ -213,36 +213,37 @@ const SitesList = () => {
   }
 
   const handleToggleAllAudits = async () => {
-    console.log('Toggling audits enabled to');
     try {
       for (const siteId of selectedKeys) {
-        await updateSite(siteId, {
+        const currentSite = sites.getItem(siteId);
+        const updatedSite = {
+          ...currentSite,
           auditConfig: {
-            auditsDisabled: !sites.getItem(siteId).auditConfig.auditsDisabled,
-          },
-        });
+            ...currentSite.auditConfig,
+            auditsDisabled: !currentSite.auditConfig.auditsDisabled
+          }
+        };
+        await updateSite(siteId, { auditConfig: updatedSite.auditConfig });
+        sites.update(siteId, updatedSite);
       }
       clearTableSelections();
-      ToastQueue.positive(`Successfully toggled audits enabled/disabled for ${selectedKeys.size} site(s)`, { timeout: 5000 });
-      sites.reload();
+      ToastQueue.positive(`Audits toggled for ${selectedKeys.size} site(s)`, { timeout: 5000 });
     } catch (error) {
-      console.log('Error toggling all audits:', error);
-      ToastQueue.negative('Error toggling all audits', { timeout: 5000 });
+      console.log('Error toggling audits:', error);
+      ToastQueue.negative('Error toggling audits', { timeout: 5000 });
     }
   }
 
   const handleToggleLiveStatus = async () => {
-    console.log('Toggling live status');
     try {
       for (const siteId of selectedKeys) {
-        const site = sites.getItem(siteId);
-        site.isLive = !site.isLive;
-        await updateSite(siteId, { isLive: site.isLive });
-        sites.reload();
+        const currentSite = sites.getItem(siteId);
+        const updatedSite = { ...currentSite, isLive: !currentSite.isLive };
+        await updateSite(siteId, { isLive: updatedSite.isLive });
+        sites.update(siteId, updatedSite);
       }
-
       clearTableSelections();
-      ToastQueue.positive(`Successfully toggled live status for ${selectedKeys.size} site(s)`, { timeout: 5000 });
+      ToastQueue.positive(`Live status toggled for ${selectedKeys.size} site(s)`, { timeout: 5000 });
     } catch (error) {
       console.log('Error toggling live status:', error);
       ToastQueue.negative('Error toggling live status', { timeout: 5000 });

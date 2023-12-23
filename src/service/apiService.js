@@ -7,24 +7,33 @@ const headers = {
   'x-api-key': `${API_KEY}`,
 };
 
-export const getSites = async () => {
+const fetchApi = async (url, options = {}) => {
   try {
-    const response = await fetch(`${BASE_URL}/sites`, { headers });
-    if (!response.ok) throw new Error('Network response was not ok.');
-    return await response.json();
+    const response = await fetch(url, { headers, ...options });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return options.method === 'DELETE' ? true : await response.json();
   } catch (error) {
-    console.error('Error fetching sites:', error);
+    console.error(`Error with API request to ${url}:`, error);
     throw error;
   }
 };
 
-export const getSite = async (siteId) => {
-  try {
-    const response = await fetch(`${BASE_URL}/sites/${siteId}`, { headers });
-    if (!response.ok) throw new Error('Network response was not ok.');
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching site ${siteId}:`, error);
-    throw error;
-  }
-};
+export const getSites = () => fetchApi(`${BASE_URL}/sites`);
+
+export const createSite = (siteData) => fetchApi(`${BASE_URL}/sites`, {
+  method: 'POST',
+  body: JSON.stringify(siteData),
+});
+
+export const updateSite = (siteId, siteData) => fetchApi(`${BASE_URL}/sites/${siteId}`, {
+  method: 'PATCH',
+  body: JSON.stringify(siteData),
+});
+
+export const deleteSite = (siteId) => fetchApi(`${BASE_URL}/sites/${siteId}`, {
+  method: 'DELETE',
+});
+
+export const getSite = (siteId) => fetchApi(`${BASE_URL}/sites/${siteId}`);

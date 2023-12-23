@@ -68,7 +68,6 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
       {isOpen && (
         <Dialog>
           <Heading>{siteData ? ('Edit Site') : ('Create Site')}</Heading>
-          <Header>Some Text ....</Header>
           <Divider/>
           <Content>
             <Heading>Site Details</Heading>
@@ -79,20 +78,29 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
               }}
               validationBehavior="native"
             >
-              <TextField
-                isRequired
-                label="Base URL"
-                name="baseURL"
-                onChange={(value) => handleChange('baseURL', value)}
-                type="url"
-                value={formValues.baseURL}
-                contextualHelp={
-                  <ContextualHelp>
-                    <Heading>Base URL</Heading>
-                    <Content>Enter the Base URL of the site, e.g. https://my-site.com/blog</Content>
-                  </ContextualHelp>
-                }
-              />
+              {
+                siteData ? (
+                  <div>
+                    <strong>Base URL:</strong> {formValues.baseURL}
+                    <br /><small>Base URL is not editable</small>
+                  </div>
+                ) : (
+                  <TextField
+                    isRequired
+                    label="Base URL"
+                    name="baseURL"
+                    onChange={(value) => handleChange('baseURL', value)}
+                    type="url"
+                    value={formValues.baseURL}
+                    contextualHelp={
+                      <ContextualHelp>
+                        <Heading>Base URL</Heading>
+                        <Content>Enter the Base URL of the site, e.g. https://my-site.com/blog</Content>
+                      </ContextualHelp>
+                    }
+                  />
+                )
+              }
               <TextField
                 label="GitHub URL"
                 name="gitHubURL"

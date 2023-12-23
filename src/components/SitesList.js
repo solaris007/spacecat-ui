@@ -40,15 +40,18 @@ import { ToastQueue } from '@react-spectrum/toast';
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };
 
 const SitesList = () => {
+  const [currentEditingSite, setCurrentEditingSite] = useState(null);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-  const [showLiveOnly, setShowLiveOnly] = useState(false);
-  const [showNonLiveOnly, setShowNonLiveOnly] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSiteBeingDeleted, setIsSiteBeingDeleted] = useState(false);
   const [isSiteCreateDialogOpen, setIsSiteCreateDialogOpen] = useState(false);
   const [isSiteDeleteDialogOpen, setIsSiteDeleteDialogOpen] = useState(false);
-  const [isSiteBeingDeleted, setIsSiteBeingDeleted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [showAuditsDisabledOnly, setShowAuditsDisabledOnly] = useState(false);
+  const [showLiveOnly, setShowLiveOnly] = useState(false);
+  const [showNonLiveOnly, setShowNonLiveOnly] = useState(false);
+
 
   const collator = useCollator({ numeric: true });
   const debouncedSearchQuery = useDebounce(searchQuery, 700);
@@ -194,6 +197,24 @@ const SitesList = () => {
     setIsSiteCreateDialogOpen(false);
   }
 
+  const handleEditSite = async (siteData) => {
+    try {
+      const siteId = currentEditingSite.id;
+      const currentSite = sites.getItem(siteId);
+      await updateSite(siteId, siteData);
+      const updatedSite = { ...currentSite, ...siteData };
+      sites.update(siteId, updatedSite);
+      clearTableSelections();
+      ToastQueue.positive(`Site ${siteId} updated`, { timeout: 5000 });
+    } catch (error) {
+      console.log('Error updating site:', error);
+      ToastQueue.negative('Error updating site', { timeout: 5000 });
+    }
+    setIsSiteCreateDialogOpen(false);
+    setIsEditMode(false);
+    setCurrentEditingSite(null);
+  };
+
   const handleDeleteSite = async () => {
     setIsSiteBeingDeleted(true);
     console.log('Deleting site(s) with ids:', selectedKeys);
@@ -257,7 +278,11 @@ const SitesList = () => {
   const handleAction = async (key) => {
     switch (key) {
       case 'edit':
-        // Edit logic
+        const siteId = Array.from(selectedKeys)[0];
+        const siteToEdit = sites.getItem(siteId);
+        setCurrentEditingSite(siteToEdit);
+        setIsEditMode(true);
+        setIsSiteCreateDialogOpen(true);
         break;
       case 'delete':
         setIsSiteDeleteDialogOpen(true);
@@ -380,8 +405,13 @@ const SitesList = () => {
       </Flex>
       <SiteFormDialog
         isOpen={isSiteCreateDialogOpen}
-        onClose={() => setIsSiteCreateDialogOpen(false)}
-        onSubmit={handleCreateSite}
+        onClose={() => {
+          setIsSiteCreateDialogOpen(false);
+          setIsEditMode(false);
+          setCurrentEditingSite(null);
+        }}
+        onSubmit={isEditMode ? handleEditSite : handleCreateSite}
+        siteData={isEditMode ? currentEditingSite : null}
       />
       <DialogContainer
         onDismiss={() => setIsSiteDeleteDialogOpen(false)} type="modal"

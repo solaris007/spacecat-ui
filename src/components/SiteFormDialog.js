@@ -9,7 +9,6 @@ import {
   DialogContainer,
   Divider,
   Form,
-  Header,
   Heading,
   TextField,
 } from '@adobe/react-spectrum';
@@ -67,10 +66,9 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
     >
       {isOpen && (
         <Dialog>
-          <Heading>{siteData ? ('Edit Site') : ('Create Site')}</Heading>
+          <Heading>{siteData ? ('Edit Site') : ('Add Site')}</Heading>
           <Divider/>
           <Content>
-            <Heading>Site Details</Heading>
             <Form
               onSubmit={e => {
                 e.preventDefault();
@@ -82,7 +80,7 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
                 siteData ? (
                   <div>
                     <strong>Base URL:</strong> {formValues.baseURL}
-                    <br /><small>Base URL is not editable</small>
+                    <br/><small>Base URL is not editable</small>
                   </div>
                 ) : (
                   <TextField
@@ -119,13 +117,16 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
                 isSelected={formValues.isLive}
                 onChange={(value) => handleChange('isLive', value)}
                 value="true"
-              >Site is Live</Checkbox>
-              <Heading>Audit Configuration</Heading>
+              >
+                Site is Live
+              </Checkbox>
               <Checkbox
                 isSelected={formValues.auditConfig.auditsDisabled}
                 onChange={(value) => handleChange('auditConfig.auditsDisabled', value)}
                 value="true"
-              >Disable All Audits</Checkbox>
+              >
+                Disable All Audits
+              </Checkbox>
               <ButtonGroup>
                 <Button variant="secondary" onPress={handleClose}>Cancel</Button>
                 <Button type="submit" variant="accent">Save</Button>

@@ -4,7 +4,7 @@ import {
   ActionButton, Button, ButtonGroup,
   Cell,
   Checkbox,
-  Column, Content, Dialog, DialogContainer,
+  Column, Content, Dialog, DialogContainer, Divider,
   Flex,
   Header, Heading,
   Item,
@@ -15,7 +15,7 @@ import {
   TableBody,
   TableHeader,
   TableView,
-  Text,
+  Text, Tooltip, TooltipTrigger,
   useAsyncList,
   useCollator,
 } from '@adobe/react-spectrum';
@@ -51,6 +51,7 @@ const SitesList = () => {
   const [showAuditsDisabledOnly, setShowAuditsDisabledOnly] = useState(false);
   const [showLiveOnly, setShowLiveOnly] = useState(false);
   const [showNonLiveOnly, setShowNonLiveOnly] = useState(false);
+  const [showSomeAuditsDisabledOnly, setShowSomeAuditsDisabledOnly] = useState(false);
 
 
   const collator = useCollator({ numeric: true });
@@ -100,6 +101,9 @@ const SitesList = () => {
     initialSortDescriptor: DEFAULT_SORT_DESCRIPTOR,
   });
 
+  const isAllAuditsDisabled = (site) => site.auditConfig && site.auditConfig.auditsDisabled;
+  const isSomeAuditsDisabled = (site) => site.auditConfig && Object.keys(site.auditConfig.auditTypeConfigs).some(type => site.auditConfig.auditTypeConfigs[type].disabled);
+
   useEffect(() => {
     let items = sites.items;
 
@@ -112,7 +116,11 @@ const SitesList = () => {
     }
 
     if (showAuditsDisabledOnly) {
-      items = items.filter(item => item.auditConfig.auditsDisabled);
+      items = items.filter(item => isAllAuditsDisabled(item));
+    }
+
+    if (showSomeAuditsDisabledOnly) {
+      items = items.filter(item => isSomeAuditsDisabled(item));
     }
 
     if (debouncedSearchQuery) {
@@ -129,7 +137,15 @@ const SitesList = () => {
     }
 
     setFilteredItems(items);
-  }, [sites.items, debouncedSearchQuery, showLiveOnly, showNonLiveOnly, showAuditsDisabledOnly, columns]);
+  }, [
+    sites.items,
+    debouncedSearchQuery,
+    showLiveOnly,
+    showNonLiveOnly,
+    showAuditsDisabledOnly,
+    showSomeAuditsDisabledOnly,
+    columns,
+  ]);
 
   const renderCellContent = (item, columnKey) => {
     switch (columnKey) {
@@ -163,11 +179,15 @@ const SitesList = () => {
         )
 
       case 'auditsDisabled':
+        const auditsDisabled = isAllAuditsDisabled(item);
+        const someAuditsDisabled = isSomeAuditsDisabled(item);
+        const label = auditsDisabled ? 'All Audits Disabled' : someAuditsDisabled ? 'Some Audits Disabled' : 'Audits Enabled';
+        const variant = auditsDisabled ? 'negative' : someAuditsDisabled ? 'yellow' : 'positive';
         return (
           <StatusLight
-            aria-label={item.auditConfig && item.auditConfig[columnKey] ? 'Yes' : 'No'}
+            aria-label={label}
             role="img"
-            variant={item.auditConfig && item.auditConfig[columnKey] ? 'negative' : 'positive'}
+            variant={variant}
           ></StatusLight>
         )
 
@@ -307,16 +327,22 @@ const SitesList = () => {
         minHeight="size-6000"
         width="100%"
       >
-        <Flex>
-          <Header>Showing {filteredItems.length} of {sites.items.length} Sites</Header>
-        </Flex>
         <Flex alignSelf="start" gap="size-150">
-          <ActionButton onPress={openSiteCreateDialog} alignSelf="start">
+          <ActionButton
+            aria-label="Create Site"
+            alignSelf="start"
+            onPress={openSiteCreateDialog}
+          >
             <Add size="S"/>
+            <Text>Add Site</Text>
           </ActionButton>
-          <ActionButton onPress={refreshSites} aria-label="Refresh Sites">
-            <Refresh size="S"/>
-          </ActionButton>
+          <TooltipTrigger>
+            <ActionButton onPress={refreshSites} aria-label="Refresh Sites">
+              <Refresh size="S"/>
+            </ActionButton>
+            <Tooltip>Refresh Sites</Tooltip>
+          </TooltipTrigger>
+          <Divider orientation="vertical" size="S" />
           <SearchField
             aria-label="Search"
             description="Search sites..."
@@ -346,6 +372,16 @@ const SitesList = () => {
           >
             All Audits Disabled
           </Checkbox>
+          <Checkbox
+            isSelected={showSomeAuditsDisabledOnly}
+            marginEnd="size-200"
+            onChange={setShowSomeAuditsDisabledOnly}
+          >
+            Some Audits Disabled
+          </Checkbox>
+        </Flex>
+        <Flex>
+          <Header>Showing {filteredItems.length} of {sites.items.length} Sites</Header>
         </Flex>
         <ActionBarContainer
           height="size-6000"

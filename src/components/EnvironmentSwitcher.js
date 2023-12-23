@@ -1,26 +1,32 @@
-// components/EnvironmentSwitcher.js
+import {
+  Badge,
+  Button,
+  Flex,
+  Text,
+} from '@adobe/react-spectrum';
 import React from 'react';
+
 import { setLocalStorageItem } from '../utils/localStorageUtil';
-import { Button, Flex } from '@adobe/react-spectrum';
-import { useNavigate } from 'react-router-dom';
 
 const EnvironmentSwitcher = ({ currentEnvironment }) => {
-  const navigate = useNavigate();
 
   const switchEnvironment = () => {
     const newEnvironment = currentEnvironment === 'development' ? 'production' : 'development';
     setLocalStorageItem('environment', newEnvironment);
-    navigate('/');
+    window.location.reload();
   };
 
   return (
     <Flex direction="row" justifyContent="space-between" alignItems="center" padding="size-200">
       <Flex gap="size-200">
-        {currentEnvironment}
-        <Button variant="primary" onPress={switchEnvironment}>
+        <Text>Current Environment:</Text>
+        <Badge variant={currentEnvironment === 'development' ? 'positive' : 'negative'}>
+          {currentEnvironment}
+        </Badge>
+        <Button variant="accent" onPress={switchEnvironment}>
           Switch to {currentEnvironment === 'development' ? 'Production' : 'Development'} Environment
         </Button>
-        </Flex>
+      </Flex>
     </Flex>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastQueue } from '@react-spectrum/toast';
-import { Content, Heading, IllustratedMessage } from '@adobe/react-spectrum';
+import { Content, Heading, IllustratedMessage, Link } from '@adobe/react-spectrum';
+import { isValidUrl } from '@adobe/spacecat-shared-utils';
 
 export const AUDIT_TYPES = ['404', 'cwv', 'lhs-desktop', 'lhs-mobile'];
 
@@ -34,6 +35,18 @@ export const renderEmptyState = () => {
       <Heading>No results</Heading>
       <Content>No results found</Content>
     </IllustratedMessage>
+  );
+}
+
+export const renderExternalLink = (url) => {
+  if (!isValidUrl(url)) {
+    return '';
+  }
+
+  return (
+    <Link target="_blank" rel="noopener noreferrer" href={url}>
+      {url}
+    </Link>
   );
 }
 

@@ -2,14 +2,12 @@ import {
   ActionBar,
   ActionBarContainer,
   ActionButton,
-  Badge,
   Button,
   ButtonGroup,
   Cell,
   Checkbox,
   Column,
   Content,
-  ContextualHelp,
   Dialog,
   DialogContainer,
   Divider,
@@ -17,10 +15,8 @@ import {
   Header,
   Heading,
   Item,
-  Link,
   Row,
   SearchField,
-  StatusLight,
   TableBody,
   TableHeader,
   TableView,
@@ -43,14 +39,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { createSite, deleteSite, getSites, updateSite } from '../service/apiService';
 import {
-  AUDIT_TYPES,
   copyToClipboard,
   formatDate,
-  renderEmptyState,
+  renderEmptyState, renderExternalLink,
   useDebounce,
 } from '../utils/utils';
 import SiteFormDialog from './SiteFormDialog';
-
+import AuditConfigStatus, { isAllAuditsDisabled, isSomeAuditsDisabled } from './AuditConfigStatus';
+import LiveStatus from './LiveStatus';
 
 
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };
@@ -119,9 +115,6 @@ const SitesList = () => {
     initialSortDescriptor: DEFAULT_SORT_DESCRIPTOR,
   });
 
-  const isAllAuditsDisabled = (site) => site.auditConfig && site.auditConfig.auditsDisabled;
-  const isSomeAuditsDisabled = (site) => site.auditConfig && Object.keys(site.auditConfig.auditTypeConfigs).some(type => site.auditConfig.auditTypeConfigs[type].disabled);
-
   useEffect(() => {
     let items = sites.items;
 
@@ -178,67 +171,13 @@ const SitesList = () => {
         return formatDate(item[columnKey]);
       case 'baseURL':
       case 'gitHubURL':
-        if (item[columnKey]) {
-          return (
-            <Link target="_blank" rel="noopener noreferrer" href={item[columnKey]}>
-              {item[columnKey]}
-            </Link>
-          );
-        }
-        break;
+        return (renderExternalLink(item[columnKey]));
 
       case 'isLive':
-        return (
-          <StatusLight
-            aria-label={item[columnKey] ? 'Live' : 'Not Live'}
-            role="img"
-            variant={item[columnKey] ? 'positive' : 'negative'}
-          ></StatusLight>
-        )
+        return (<LiveStatus item={item}/>)
 
       case 'auditConfig':
-        const auditsDisabled = isAllAuditsDisabled(item);
-        const someAuditsDisabled = isSomeAuditsDisabled(item);
-        const auditTypeConfigs = item.auditConfig.auditTypeConfigs;
-        const label = auditsDisabled ? 'All Audits Disabled' : someAuditsDisabled ? 'Some Audits Disabled' : 'Audits Enabled';
-        const variant = auditsDisabled ? 'negative' : someAuditsDisabled ? 'yellow' : 'positive';
-        return (
-          <Flex alignItems="center">
-            <StatusLight
-              aria-label={label}
-              role="img"
-              variant={variant}
-            ></StatusLight>
-            {someAuditsDisabled && (
-              <ContextualHelp variant="info">
-                <Heading>Audit Configuration</Heading>
-                <Content>
-                  <Flex direction="column" gap="size-100">
-                    <Flex direction="row" gap="size-200">
-                      <Text>All Audits</Text>
-                      <Badge
-                        variant={auditsDisabled ? 'negative' : 'positive'}
-                      >
-                        {auditsDisabled ? 'Disabled' : 'Enabled'}
-                      </Badge>
-                    </Flex>
-                    <Heading level={3}>Audit Types</Heading>
-                    {AUDIT_TYPES.map((key) => (
-                      <Flex direction="row" gap="size-200" key={key}>
-                        <Text>{key}</Text>
-                        <Badge
-                          variant={auditTypeConfigs[key]?.disabled ? 'negative' : 'positive'}
-                        >
-                          {auditTypeConfigs[key]?.disabled ? 'Disabled' : 'Enabled'}
-                        </Badge>
-                      </Flex>
-                    ))}
-                  </Flex>
-                </Content>
-              </ContextualHelp>
-            )}
-          </Flex>
-        )
+        return (<AuditConfigStatus site={item}/>)
 
       default:
         return item[columnKey];

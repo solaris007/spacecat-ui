@@ -1,5 +1,4 @@
-// AppWithRouter.js
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { defaultTheme, Provider } from '@adobe/react-spectrum';
 import { ToastContainer } from '@react-spectrum/toast';
 import NavigationBar from './components/NavigationBar';
@@ -8,7 +7,7 @@ import Sites from './components/Sites';
 import SitesDetails from './components/SitesDetails';
 import Audits from './components/Audits';
 import AuthPrompt from './components/AuthPrompt';
-import AuthProvider from './components/AuthProvider';
+import AuthProvider from './auth/AuthProvider';
 
 const AppWithRouter = () => {
   return (

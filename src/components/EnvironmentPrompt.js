@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { getLocalStorageItem, setLocalStorageItem } from '../utils/localStorageUtil';
 import { Button, TextField, Picker, Item, Flex, Heading } from '@adobe/react-spectrum';
+import AuthContext from '../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const EnvironmentPrompt = () => {
   const [apiKey, setApiKey] = useState('');
   const [environment, setEnvironment] = useState('');
+  const navigate = useNavigate();
+
+  const { setIsAuthenticated, setEnvironment: setContextEnvironment } = useContext(AuthContext);
 
   useEffect(() => {
     const storedEnvironment = getLocalStorageItem('environment');
@@ -20,7 +25,9 @@ const EnvironmentPrompt = () => {
   const handleSave = () => {
     setLocalStorageItem('environment', environment);
     setLocalStorageItem(`apiKey_${environment}`, apiKey);
-    window.location.reload(); // Reload to apply changes
+    setContextEnvironment(environment);
+    setIsAuthenticated(true);
+    navigate('/');
   };
 
   return (

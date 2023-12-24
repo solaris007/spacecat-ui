@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ToastQueue } from '@react-spectrum/toast';
 import { Content, Heading, IllustratedMessage } from '@adobe/react-spectrum';
 
+export const AUDIT_TYPES = ['404', 'cwv', 'lhs-desktop', 'lhs-mobile'];
+
 export const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 

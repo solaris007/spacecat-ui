@@ -8,11 +8,13 @@ import {
   Dialog,
   DialogContainer,
   Divider,
-  Form,
+  Form, Header,
   Heading,
   TextField,
 } from '@adobe/react-spectrum';
 import { hasText, isValidUrl } from '@adobe/spacecat-shared-utils';
+
+import { AUDIT_TYPES } from '../utils/utils';
 
 const EMPTY_SITE = {
   baseURL: '',
@@ -103,7 +105,7 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
                 label="GitHub URL"
                 name="gitHubURL"
                 onChange={(value) => handleChange('gitHubURL', value)}
-                value={formValues.gitHubURL}
+                value={formValues.gitHubURL || ''}
                 validate={validateGitHubURL}
                 contextualHelp={
                   <ContextualHelp>
@@ -120,6 +122,8 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
               >
                 Site is Live
               </Checkbox>
+              <Divider size="S"/>
+              <Heading level={3}>Audit Configuration</Heading>
               <Checkbox
                 isSelected={formValues.auditConfig.auditsDisabled}
                 onChange={(value) => handleChange('auditConfig.auditsDisabled', value)}
@@ -127,6 +131,19 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
               >
                 Disable All Audits
               </Checkbox>
+              {AUDIT_TYPES.map(auditType => (
+                <div key={auditType}>
+                  <Header>{auditType}</Header>
+                  <Checkbox
+                    isSelected={formValues.auditConfig.auditTypeConfigs[auditType]?.disabled}
+                    onChange={(value) => handleChange(`auditConfig.auditTypeConfigs.${auditType}.disabled`, value)}
+                    value="true"
+                  >
+                    Disable Audit
+                  </Checkbox>
+                </div>
+              ))}
+              <Divider size="S"/>
               <ButtonGroup>
                 <Button variant="secondary" onPress={handleClose}>Cancel</Button>
                 <Button type="submit" variant="accent">Save</Button>

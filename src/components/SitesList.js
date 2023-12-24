@@ -1,12 +1,21 @@
 import {
   ActionBar,
   ActionBarContainer,
-  ActionButton, Button, ButtonGroup,
+  ActionButton,
+  Badge,
+  Button,
+  ButtonGroup,
   Cell,
   Checkbox,
-  Column, Content, Dialog, DialogContainer, Divider,
+  Column,
+  Content,
+  ContextualHelp,
+  Dialog,
+  DialogContainer,
+  Divider,
   Flex,
-  Header, Heading,
+  Header,
+  Heading,
   Item,
   Link,
   Row,
@@ -15,7 +24,9 @@ import {
   TableBody,
   TableHeader,
   TableView,
-  Text, Tooltip, TooltipTrigger,
+  Text,
+  Tooltip,
+  TooltipTrigger,
   useAsyncList,
   useCollator,
 } from '@adobe/react-spectrum';
@@ -29,6 +40,7 @@ import Play from '@spectrum-icons/workflow/Play';
 
 import { createSite, deleteSite, getSites, updateSite } from '../service/apiService';
 import {
+  AUDIT_TYPES,
   copyToClipboard,
   formatDate,
   renderEmptyState,
@@ -62,7 +74,7 @@ const SitesList = () => {
     { uid: 'baseURL', name: 'Base URL' },
     { uid: 'gitHubURL', name: 'GitHub URL' },
     { uid: 'isLive', name: 'Live', width: '0.2fr' },
-    { uid: 'auditsDisabled', name: 'Audits', width: '0.3fr' },
+    { uid: 'auditConfig', name: 'Audits', width: '0.3fr' },
     { uid: 'updatedAt', name: 'Updated At (UTC)', width: '0.6fr' },
     { uid: 'createdAt', name: 'Created At (UTC)', width: '0.6fr' },
   ], []);
@@ -178,17 +190,48 @@ const SitesList = () => {
           ></StatusLight>
         )
 
-      case 'auditsDisabled':
+      case 'auditConfig':
         const auditsDisabled = isAllAuditsDisabled(item);
         const someAuditsDisabled = isSomeAuditsDisabled(item);
+        const auditTypeConfigs = item.auditConfig.auditTypeConfigs;
         const label = auditsDisabled ? 'All Audits Disabled' : someAuditsDisabled ? 'Some Audits Disabled' : 'Audits Enabled';
         const variant = auditsDisabled ? 'negative' : someAuditsDisabled ? 'yellow' : 'positive';
         return (
-          <StatusLight
-            aria-label={label}
-            role="img"
-            variant={variant}
-          ></StatusLight>
+          <Flex alignItems="center">
+            <StatusLight
+              aria-label={label}
+              role="img"
+              variant={variant}
+            ></StatusLight>
+            {someAuditsDisabled && (
+              <ContextualHelp variant="info">
+                <Heading>Audit Configuration</Heading>
+                <Content>
+                  <Flex direction="column" gap="size-100">
+                    <Flex direction="row" gap="size-200">
+                      <Text>All Audits</Text>
+                      <Badge
+                        variant={auditsDisabled ? 'negative' : 'positive'}
+                      >
+                        {auditsDisabled ? 'Disabled' : 'Enabled'}
+                      </Badge>
+                    </Flex>
+                    <Heading level={3}>Audit Types</Heading>
+                    {AUDIT_TYPES.map((key) => (
+                      <Flex direction="row" gap="size-200">
+                        <Text>{key}</Text>
+                        <Badge
+                          variant={auditTypeConfigs[key]?.disabled ? 'negative' : 'positive'}
+                        >
+                          {auditTypeConfigs[key]?.disabled ? 'Disabled' : 'Enabled'}
+                        </Badge>
+                      </Flex>
+                    ))}
+                  </Flex>
+                </Content>
+              </ContextualHelp>
+            )}
+          </Flex>
         )
 
       default:
@@ -342,7 +385,7 @@ const SitesList = () => {
             </ActionButton>
             <Tooltip>Refresh Sites</Tooltip>
           </TooltipTrigger>
-          <Divider orientation="vertical" size="S" />
+          <Divider orientation="vertical" size="S"/>
           <SearchField
             aria-label="Search"
             description="Search sites..."

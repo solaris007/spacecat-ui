@@ -7,3 +7,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: rgb(29, 29, 29);
 }
+
+a.nav-link {
+  font-weight: bold;
+  font-size: 1.5em;
+  text-decoration: none;
+  color: white;
+}
+
+a.nav-link:hover {
+  text-decoration: underline;
+  color: gold;
+}
+
+a.nav-link.active {
+  color: gold;
+}

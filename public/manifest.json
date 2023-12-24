@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "SpaceCat Admin",
+  "name": "SpaceCat Sites & Audits Administration",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,18 +8,28 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "spacecat_logo_50.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "50x49"
     },
     {
-      "src": "logo512.png",
+      "src": "spacecat_logo_192.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "192x189"
+    },
+    {
+      "src": "spacecat_logo_512.png",
+      "type": "image/png",
+      "sizes": "512x505"
+    },
+    {
+      "src": "spacecat_logo_832.png",
+      "type": "image/png",
+      "sizes": "832x820"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "rgb(29, 29, 29);"
 }

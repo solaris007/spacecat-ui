@@ -4,6 +4,24 @@ import { Content, Heading, IllustratedMessage, Link } from '@adobe/react-spectru
 import { isValidUrl } from '@adobe/spacecat-shared-utils';
 
 export const AUDIT_TYPES = ['404', 'cwv', 'lhs-desktop', 'lhs-mobile'];
+const PSI_ERROR_MAP = {
+  ERRORED_DOCUMENT_REQUEST: {
+    messageFormat: 'Could not fetch the page (Status: {statusCode})',
+    pattern: /\(Status code: (\d+)\)/,
+  },
+  FAILED_DOCUMENT_REQUEST: {
+    messageFormat: 'Failed to load the page (Details: {details})',
+    pattern: /\(Details: (.+)\)/,
+  },
+  DNS_FAILURE: {
+    messageFormat: 'DNS lookup failed',
+    pattern: null,
+  },
+  NO_FCP: {
+    messageFormat: 'No First Contentful Paint',
+    pattern: null,
+  },
+};
 
 export const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -49,6 +67,30 @@ export const renderExternalLink = (url) => {
     </Link>
   );
 }
+
+export const formatPercent = (value) => {
+  return `${Math.round(value * 100)}%`;
+};
+
+export const formatLighthouseError = (runtimeError) => {
+  const { code, message } = runtimeError;
+  const errorConfig = PSI_ERROR_MAP[code] || { messageFormat: 'Unknown error', pattern: null };
+  let description = errorConfig.messageFormat;
+
+  if (errorConfig.pattern) {
+    const match = message.match(errorConfig.pattern);
+    if (match) {
+      const placeholders = [...match].slice(1);
+      placeholders.forEach((value) => {
+        description = description.replace(/\{[^}]+\}/i, value);
+      });
+    } else {
+      description = description.replace(/\{[^}]+\}/g, 'unknown');
+    }
+  }
+
+  return `${description} [${code}]`;
+};
 
 export const formatDate = (dateString) => {
   const date = new Date(dateString);

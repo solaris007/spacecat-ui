@@ -1,29 +1,36 @@
 import {
-  ActionButton, Divider,
+  ActionButton, Cell, Column, Divider,
   Flex,
   Grid,
-  Heading,
-  ProgressCircle,
+  Heading, Item, Link, Picker,
+  ProgressCircle, Row, TableBody, TableHeader, TableView,
   Text,
   View,
 } from '@adobe/react-spectrum';
 import { ToastQueue } from '@react-spectrum/toast';
 import Edit from '@spectrum-icons/workflow/Edit';
+import Actions from '@spectrum-icons/workflow/Actions';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { getSite, updateSite } from '../service/apiService';
+import { getAuditsOfTypeForSite, getSite, updateSite } from '../service/apiService';
 import { formatDate, renderExternalLink } from '../utils/utils';
 
 import LiveStatus from './LiveStatus';
 import AuditConfigStatus from './AuditConfigStatus';
 import SiteFormDialog from './SiteFormDialog';
+import Globe from '@spectrum-icons/workflow/Globe';
+import ErrorStatus from './ErrorStatus';
+import AuditScoreStatus from './AuditScoreStatus';
 
 const SiteDetails = () => {
   const { siteId } = useParams();
-  const [siteData, setSiteData] = useState(null);
+  const [auditType, setAuditType] = useState('lhs-mobile');
+  const [audits, setAudits] = useState(null);
+  const [isAuditsLoading, setIsAuditsLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSiteEditDialogOpen, setIsSiteEditDialogOpen] = useState(false);
+  const [siteData, setSiteData] = useState(null);
 
   useEffect(() => {
     const fetchSiteData = async () => {
@@ -40,6 +47,25 @@ const SiteDetails = () => {
 
     fetchSiteData();
   }, [siteId]);
+
+  useEffect(() => {
+    const fetchAudits = async (type) => {
+      setIsAuditsLoading(true);
+      try {
+        const auditData = await getAuditsOfTypeForSite(siteId, type);
+        setAudits(auditData);
+      } catch (error) {
+        console.error('Error fetching audits:', error);
+        ToastQueue.negative('Error fetching audits');
+      } finally {
+        setIsAuditsLoading(false);
+      }
+    };
+
+    if (auditType) {
+      fetchAudits(auditType);
+    }
+  }, [auditType, siteId]);
 
   const onEditSite = () => {
     setIsSiteEditDialogOpen(true);
@@ -64,9 +90,9 @@ const SiteDetails = () => {
     <Grid
       areas={{
         base: [
-        'header',
-        'info',
-        'audits',
+          'header',
+          'info',
+          'audits',
         ],
         M: [
           'header header',
@@ -123,16 +149,44 @@ const SiteDetails = () => {
         </Flex>
       </View>
       <View gridArea="audits">
-        <View
-          borderWidth="thin"
-          borderColor="dark"
-          borderRadius="medium"
-          padding="size-250"
-        >
+        <View borderWidth="thin" borderColor="dark" borderRadius="medium" padding="size-250">
           <Flex direction="column" gap="size-100">
             <Text>Audits</Text>
             <Divider size="S"/>
-            <Text>Coming soon...</Text>
+            <Picker label="Audit Type" selectedKey={auditType} onSelectionChange={setAuditType}>
+              <Item key="lhs-desktop">LHS Desktop</Item>
+              <Item key="lhs-mobile">LHS Mobile</Item>
+            </Picker>
+            {isAuditsLoading ? (
+              <ProgressCircle aria-label="Loading Audits…" isIndeterminate/>
+            ) : (
+              <TableView aria-label="Audit List" height="size-2400">
+                <TableHeader>
+                  <Column key="auditedAt" width="0.6fr">Audited At</Column>
+                  <Column key="fullAuditRef">Scores</Column>
+                  <Column key="isLive" width="0.2fr">Live</Column>
+                  <Column key="isError" width="0.2fr">Error</Column>
+                  <Column key="actions" width="0.2fr"><Actions size="S"/></Column>
+                </TableHeader>
+                <TableBody>
+                  {audits && audits.map((audit, index) => (
+                    <Row key={index}>
+                      {/* Define cells */}
+                      <Cell>{formatDate(audit.auditedAt)}</Cell>
+                      <Cell><AuditScoreStatus audit={audit}/></Cell>
+                      <Cell><LiveStatus item={audit}/></Cell>
+                      <Cell><ErrorStatus item={audit}/></Cell>
+                      <Cell>
+                        <Link href={`https://googlechrome.github.io/lighthouse/viewer/?jsonurl=${audit.fullAuditRef}`}
+                              rel="noopener noreferrer" target="_blank">
+                          <Globe size="S"/>
+                        </Link>
+                      </Cell>
+                    </Row>
+                  ))}
+                </TableBody>
+              </TableView>
+            )}
           </Flex>
         </View>
       </View>

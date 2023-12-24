@@ -34,6 +34,8 @@ export const getSites = () => fetchApi('sites');
 
 export const getSitesWithLatestAudits = (auditType = 'lhs-mobile') => fetchApi(`sites/with-latest-audit/${auditType}`);
 
+export const getAuditsOfTypeForSite = (siteId, auditType) => fetchApi(`sites/${siteId}/audits/${auditType}?ascending=false`);
+
 export const createSite = (siteData) => fetchApi('sites', {
   method: 'POST',
   body: JSON.stringify(siteData),

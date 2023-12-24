@@ -373,13 +373,7 @@ const SitesList = () => {
 
   return (
     <div>
-      <Flex
-        direction="column"
-        gap="size-200"
-        height="size-6000"
-        minHeight="size-6000"
-        width="100%"
-      >
+      <Flex direction="column" gap="size-200" width="100%">
         <Flex alignSelf="start" gap="size-150">
           <ActionButton
             aria-label="Create Site"

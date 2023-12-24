@@ -1,14 +1,24 @@
 // components/Footer.js
 import React from 'react';
-import { Flex, Text } from '@adobe/react-spectrum';
+import { Flex, Link, Text, Well } from '@adobe/react-spectrum';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Flex justifyContent="center" alignItems="center" padding="size-200">
-      <Text>&copy; {currentYear} Your Company Name</Text>
-    </Flex>
+    <Well>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Text>SpaceCat Admin</Text>
+        <Link
+          target="_blank"
+          variant="secondary"
+          href="https://adobe.enterprise.slack.com/archives/C05B53SRX7V"
+        >
+          Support via Slack at #franklin-spacecat
+        </Link>
+        <Text>&copy; {currentYear} Adobe</Text>
+      </Flex>
+    </Well>
   );
 };
 

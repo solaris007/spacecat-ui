@@ -30,13 +30,16 @@ import {
   useAsyncList,
   useCollator,
 } from '@adobe/react-spectrum';
+import { ToastQueue } from '@react-spectrum/toast';
 import Refresh from '@spectrum-icons/workflow/Refresh';
 import Add from '@spectrum-icons/workflow/Add';
-import React, { useEffect, useMemo, useState } from 'react';
 import Edit from '@spectrum-icons/workflow/Edit';
 import Delete from '@spectrum-icons/workflow/Delete';
 import Globe from '@spectrum-icons/workflow/Globe';
 import Play from '@spectrum-icons/workflow/Play';
+import Magnify from '@spectrum-icons/workflow/Magnify';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { createSite, deleteSite, getSites, updateSite } from '../service/apiService';
 import {
@@ -47,7 +50,8 @@ import {
   useDebounce,
 } from '../utils/utils';
 import SiteFormDialog from './SiteFormDialog';
-import { ToastQueue } from '@react-spectrum/toast';
+
+
 
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };
 
@@ -68,6 +72,7 @@ const SitesList = () => {
 
   const collator = useCollator({ numeric: true });
   const debouncedSearchQuery = useDebounce(searchQuery, 700);
+  const navigate = useNavigate();
 
   const columns = useMemo(() => [
     { uid: 'id', name: 'Id' },
@@ -80,6 +85,7 @@ const SitesList = () => {
   ], []);
 
   const initialActionBarItems = [
+    { key: 'open', label: 'Open', icon: <Magnify/>, maxSelections: 1 },
     { key: 'edit', label: 'Edit', icon: <Edit/>, maxSelections: 1 },
     { key: 'delete', label: 'Delete', icon: <Delete/> },
     { key: 'toggle-live-status', label: 'Toggle Live Status', icon: <Globe/> },
@@ -218,7 +224,7 @@ const SitesList = () => {
                     </Flex>
                     <Heading level={3}>Audit Types</Heading>
                     {AUDIT_TYPES.map((key) => (
-                      <Flex direction="row" gap="size-200">
+                      <Flex direction="row" gap="size-200" key={key}>
                         <Text>{key}</Text>
                         <Badge
                           variant={auditTypeConfigs[key]?.disabled ? 'negative' : 'positive'}
@@ -340,6 +346,10 @@ const SitesList = () => {
 
   const handleAction = async (key) => {
     switch (key) {
+      case 'open':
+        const siteIdToOpen = Array.from(selectedKeys)[0];
+        navigate(`/sites/${siteIdToOpen}`)
+        break;
       case 'edit':
         const siteId = Array.from(selectedKeys)[0];
         const siteToEdit = sites.getItem(siteId);
@@ -509,6 +519,7 @@ const SitesList = () => {
               <Button
                 isPending={isSiteBeingDeleted}
                 variant="negative"
+                style="fill"
                 onPress={handleDeleteSite}
               >Delete</Button>
             </ButtonGroup>

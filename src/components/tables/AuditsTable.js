@@ -10,7 +10,7 @@ import React from 'react';
 
 import { formatDate, renderExternalLink } from '../../utils/utils';
 
-import AuditScoreStatus from '../content/AuditScoreStatus';
+import AuditLHSScoreStatus from '../content/AuditLHSScoreStatus';
 import LiveStatus from '../content/LiveStatus';
 import ErrorStatus from '../content/ErrorStatus';
 
@@ -32,7 +32,7 @@ function AuditsTable({ auditType, audits }) {
           <Row key={index}>
             <Cell>{formatDate(audit.auditedAt)}</Cell>
             <Cell>{renderExternalLink(audit.auditResult.finalUrl)}</Cell>
-            <Cell><AuditScoreStatus audit={audit}/></Cell>
+            <Cell><AuditLHSScoreStatus audit={audit}/></Cell>
             <Cell><LiveStatus item={audit}/></Cell>
             <Cell><ErrorStatus item={audit}/></Cell>
             <Cell><AuditsRowActions audit={audit} auditType={auditType}/></Cell>

@@ -23,3 +23,17 @@ a.nav-link:hover {
 a.nav-link.active {
   color: gold;
 }
+
+@keyframes horizontalFlip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.flipping {
+  animation: horizontalFlip 10s linear infinite;
+}
+

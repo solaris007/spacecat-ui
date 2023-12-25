@@ -15,9 +15,9 @@ const AppWithRouter = () => {
     <AuthProvider>
       <Provider theme={defaultTheme}>
         <ToastContainer/>
-        <Flex direction="column" minHeight="100vh" gap="size-150">
+        <Flex direction="column" gap="size-150">
           <NavigationBar/>
-          <View flexGrow>
+          <View>
             <Routes>
               <Route path="/" element={<Welcome/>}/>
               <Route path="/sites" element={<Sites/>}/>

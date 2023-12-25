@@ -12,7 +12,7 @@ const NavigationBar = () => {
   const currentPath = location.pathname;
 
   const getLinkClassName = (path) => {
-    return currentPath.startsWith(path) ? 'active nav-link' : 'nav-link';
+    return currentPath === path || (path !== '/' && currentPath.startsWith(path)) ? 'active nav-link' : 'nav-link';
   };
 
   return (
@@ -22,6 +22,9 @@ const NavigationBar = () => {
           <Link href="/">
             <Image src="/spacecat_logo_50.webp" alt="SpaceCat Logo" width="50px"/>
           </Link>
+          <Divider size="S" orientation="vertical"/>
+          <Link UNSAFE_className={getLinkClassName('/')} href="/">Dashboard</Link>
+          <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName('/sites')} href="/sites">Sites</Link>
           <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName('/audits')} href="/audits">Audits</Link>

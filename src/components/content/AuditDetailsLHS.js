@@ -1,5 +1,6 @@
 import {
-  Badge, Cell, Column,
+  Cell,
+  Column,
   Divider,
   Flex,
   Grid, Heading, Row, TableBody, TableHeader, TableView,
@@ -13,8 +14,7 @@ import { createPSIReportURL, formatBytes, formatDate, formatMs, renderExternalLi
 import LiveStatus from './LiveStatus';
 import ErrorStatus from './ErrorStatus';
 import AuditErrorLHS from './AuditErrorLHS';
-import RadarPSIScores from '../charts/RadarPSIScores';
-import AuditScoreStatus from './AuditScoreStatus';
+import AuditLHSScoreStatus from './AuditLHSScoreStatus';
 
 function AuditDetailsLHS({ audit }) {
   return (
@@ -79,7 +79,7 @@ function AuditDetailsLHS({ audit }) {
         ) : (
           <Flex direction="column" gap="size-150">
             <Heading level={3}>Scores</Heading>
-            <AuditScoreStatus audit={audit}/>
+            <AuditLHSScoreStatus audit={audit}/>
             <Heading level={3}>Third Parties</Heading>
             <TableView aria-label="Third Parties" height="size-3600">
               <TableHeader>

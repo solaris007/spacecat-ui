@@ -1,10 +1,11 @@
 import React from 'react';
-import SitesList from './SitesList';
+import SitesList from '../SitesList';
+import { Heading } from '@adobe/react-spectrum';
 
 const Sites = () => {
   return (
     <div>
-      <h1>Sites Collection</h1>
+      <Heading level={1}>Sites</Heading>
       <SitesList />
     </div>
   );

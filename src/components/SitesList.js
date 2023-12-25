@@ -44,9 +44,9 @@ import {
   renderEmptyState, renderExternalLink,
   useDebounce,
 } from '../utils/utils';
-import SiteFormDialog from './SiteFormDialog';
-import AuditConfigStatus, { isAllAuditsDisabled, isSomeAuditsDisabled } from './AuditConfigStatus';
-import LiveStatus from './LiveStatus';
+import SiteFormDialog from './dialogs/SiteFormDialog';
+import AuditConfigStatus, { isAllAuditsDisabled, isSomeAuditsDisabled } from './content/AuditConfigStatus';
+import LiveStatus from './content/LiveStatus';
 
 
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };

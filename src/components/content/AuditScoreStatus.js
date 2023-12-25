@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, Flex, Text } from '@adobe/react-spectrum';
-import { formatLighthouseError, formatPercent } from '../utils/utils';
+import { formatLighthouseError, formatPercent } from '../../utils/utils';
 
 const scoreNames = [
   { key: 'performance', label: 'Performance' },

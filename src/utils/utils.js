@@ -56,16 +56,24 @@ export const renderEmptyState = () => {
   );
 }
 
-export const renderExternalLink = (url) => {
+export const renderExternalLink = (url, text = url) => {
   if (!isValidUrl(url)) {
     return '';
   }
 
   return (
     <Link target="_blank" rel="noopener noreferrer" href={url}>
-      {url}
+      {text}
     </Link>
   );
+}
+
+export const formatMs = (value, includeUnit = false) => {
+  return `${Math.round(value)}${includeUnit ? ' ms' : ''}`;
+}
+
+export const formatBytes = (value, includeUnit = false) => {
+  return `${Math.round(value / 1024)}${includeUnit ? ' KB' : ''}`;
 }
 
 export const formatPercent = (value) => {
@@ -103,3 +111,7 @@ export const formatDate = (dateString) => {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+
+export const createPSIReportURL = (fullAuditRef) => {
+  return `https://googlechrome.github.io/lighthouse/viewer/?jsonurl=${fullAuditRef}`;
+}

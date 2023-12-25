@@ -14,7 +14,7 @@ import {
 } from '@adobe/react-spectrum';
 import { hasText, isValidUrl } from '@adobe/spacecat-shared-utils';
 
-import { AUDIT_TYPES } from '../utils/utils';
+import { AUDIT_TYPES } from '../../utils/utils';
 
 const EMPTY_SITE = {
   baseURL: '',

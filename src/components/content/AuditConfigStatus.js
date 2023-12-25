@@ -9,7 +9,7 @@ import {
   Text,
 } from '@adobe/react-spectrum';
 
-import { AUDIT_TYPES } from '../utils/utils';
+import { AUDIT_TYPES } from '../../utils/utils';
 
 export const isAllAuditsDisabled = (site) => site.auditConfig && site.auditConfig.auditsDisabled;
 export const isSomeAuditsDisabled = (site) => site.auditConfig && Object.keys(site.auditConfig.auditTypeConfigs).some(type => site.auditConfig.auditTypeConfigs[type].disabled);

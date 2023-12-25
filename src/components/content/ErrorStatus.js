@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusLight } from '@adobe/react-spectrum';
 
 const ErrorStatus = ({item}) => {
-  const ieError = item?.ieError;
+  const ieError = item?.isError;
   return (
     <StatusLight
       aria-label={ieError ? 'OK' : 'Error'}

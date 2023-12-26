@@ -1,12 +1,23 @@
+import { Text } from '@adobe/react-spectrum';
+
 import LHSDashboard from './LHSDashboard';
 
-function SpacecatDashboard({ auditType, onLoadingComplete }) {
+function SpacecatDashboard({
+                             auditType,
+                             onLoadingComplete,
+                             onLoadingText,
+                             onDashboardTitle,
+                           }) {
   switch (auditType) {
-    case 'lhs-desktop':
-    case 'lhs-mobile':
-      return <LHSDashboard auditType={auditType} onLoadingComplete={onLoadingComplete} />
+    case 'lhs':
+      return <LHSDashboard
+        onLoadingComplete={onLoadingComplete}
+        onLoadingText={onLoadingText}
+        onDashboardTitle={onDashboardTitle}
+      />
     default:
-      return null;
+      onDashboardTitle('404 Report');
+      return <Text>Coming Soon...</Text>;
   }
 }
 

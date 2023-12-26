@@ -34,7 +34,7 @@ const NavigationBar = () => {
           <EnvironmentSwitcher currentEnvironment={environment}/>
         </View>
       </Flex>
-      <Divider size="S"/>
+      <Divider size="M"/>
     </Flex>
   );
 };

@@ -27,10 +27,18 @@ const AuthProvider = ({ children }) => {
     const newEnvironment = environment === 'development' ? 'production' : 'development';
     setLocalStorageItem('environment', newEnvironment);
     checkAuthentication(newEnvironment);
+    window.location.reload();
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, environment, setEnvironment, switchEnvironment }}>
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      setIsAuthenticated,
+      environment,
+      setEnvironment,
+      switchEnvironment
+    }}
+    >
       {children}
     </AuthContext.Provider>
   );

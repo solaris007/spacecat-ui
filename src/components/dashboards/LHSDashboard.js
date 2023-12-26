@@ -8,16 +8,21 @@ import SitesErrorsTable from '../tables/SitesErrorsTable';
 import SitesDisabledTable from '../tables/SitesDisabledTable';
 import AggregatedBarChartPSIScores from '../charts/AggregatedBarChartPSIScores';
 
-function LHSDashboard({ auditType, onLoadingComplete }) {
-  const [sites, setSites] = useState([]);
+function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
+  const [sites, setSites] = useState({ 'lhs-desktop': [], 'lhs-mobile': [] });
   const [isLoaded, setIsLoaded] = useState(false);
+  onDashboardTitle('Lighthouse Scores');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoaded(false);
         onLoadingComplete(true);
-        const data = await getSitesWithLatestAudits(auditType);
+        const data = {};
+        for (const auditType of ['lhs-desktop', 'lhs-mobile']) {
+          onLoadingText(`Loading Lighthouse Scores (${auditType})...`);
+          data[auditType] = await getSitesWithLatestAudits(auditType);
+        }
         setSites(data);
         setIsLoaded(true);
       } catch (error) {
@@ -28,15 +33,15 @@ function LHSDashboard({ auditType, onLoadingComplete }) {
     };
 
     fetchData();
-  }, [auditType]);
+  }, []);
 
   if (!isLoaded) {
     return null;
   }
 
-  const scoredSites = sites.filter(site => Array.isArray(site.audits) && site.audits.length === 1 && !site.audits[0].isError);
-  const errorSites = sites.filter(site => Array.isArray(site.audits) && site.audits.length === 1 && site.audits[0].isError);
-  const disabledSites = sites.filter(site => site.auditConfig.auditsDisabled || site.auditConfig.auditTypeConfigs[auditType]?.disabled);
+  const scoredSites = sites['lhs-mobile'].filter(site => Array.isArray(site.audits) && site.audits.length === 1 && !site.audits[0].isError);
+  const errorSites = sites['lhs-mobile'].filter(site => Array.isArray(site.audits) && site.audits.length === 1 && site.audits[0].isError);
+  const disabledSites = sites['lhs-mobile'].filter(site => site.auditConfig.auditsDisabled || site.auditConfig.auditTypeConfigs['lhs-mobile']?.disabled);
 
   return (
     <Grid
@@ -63,16 +68,16 @@ function LHSDashboard({ auditType, onLoadingComplete }) {
         <AggregatedBarChartPSIScores sites={scoredSites}/>
       </View>
       <View gridArea="table-scores">
-        <h2>Challenged</h2>
-        <SitesScoresTable sites={scoredSites} auditType={auditType}/>
+        <h2>Scores ({scoredSites.length})</h2>
+        <SitesScoresTable sites={scoredSites}/>
       </View>
       <View gridArea="table-errors">
-        <h2>Errored</h2>
-        <SitesErrorsTable sites={errorSites} auditType={auditType}/>
+        <h2>Errors ({errorSites.length})</h2>
+        <SitesErrorsTable sites={errorSites}/>
       </View>
       <View gridArea="table-disabled">
-        <h2>Disabled</h2>
-        <SitesDisabledTable sites={disabledSites} auditType={auditType}/>
+        <h2>Disabled ({disabledSites.length})</h2>
+        <SitesDisabledTable sites={disabledSites}/>
       </View>
     </Grid>
   );

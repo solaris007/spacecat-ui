@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Badge, Button, Flex, Text } from '@adobe/react-spectrum';
+import { Badge, Button, Flex, Item, Picker, Text } from '@adobe/react-spectrum';
 import AuthContext from '../auth/AuthContext';
 
 const EnvironmentSwitcher = () => {
@@ -7,13 +7,15 @@ const EnvironmentSwitcher = () => {
 
   return (
     <Flex gap="size-200" alignItems="center">
-      <Text>Current Environment:</Text>
-      <Badge variant={environment === 'development' ? 'positive' : 'negative'}>
-        {environment}
-      </Badge>
-      <Button variant="accent" onPress={switchEnvironment}>
-        Switch to {environment === 'development' ? 'Production' : 'Development'} Environment
-      </Button>
+      <Picker
+        label="Environment"
+        labelPosition="side"
+        selectedKey={environment}
+        onSelectionChange={switchEnvironment}
+      >
+        <Item key="development">Development</Item>
+        <Item key="production">Production</Item>
+      </Picker>
     </Flex>
   );
 };

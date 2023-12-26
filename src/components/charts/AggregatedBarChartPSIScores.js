@@ -54,10 +54,10 @@ function AggregatedBarChartPSIScores({ sites }) {
 
   return (
     <Flex direction="column" gap="size-200" width="100%">
-      <Flex direction="row" gap="size-200">
-        <Text><strong>Aggregated Scores</strong></Text>
+      <Flex direction="row" gap="size-200" alignItems="center">
+        <Heading level={3} margin="size-150">Aggregated Scores</Heading>
         <ContextualHelp variant="info">
-          <Heading>Aggregated Scores Bar Chart</Heading>
+          <Heading>Aggregated Scores Help</Heading>
           <Content>
             <Text>
               This chart shows the aggregated scores based on the latest audit for each site. The scores are grouped

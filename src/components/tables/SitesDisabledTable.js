@@ -13,7 +13,7 @@ import { renderExternalLink } from '../../utils/utils';
 import SiteRowActions from './actions/SiteRowActions';
 import AuditConfigStatus from '../content/AuditConfigStatus';
 
-function SitesDisabledTable({ sites }) {
+function SitesDisabledTable({ sites, updateSites }) {
   return (
     <TableView
       aria-label="Disabled List"
@@ -29,7 +29,7 @@ function SitesDisabledTable({ sites }) {
           <Row key={index}>
             <Cell>{renderExternalLink(site.baseURL)}</Cell>
             <Cell><AuditConfigStatus site={site}/></Cell>
-            <Cell><SiteRowActions site={site}/></Cell>
+            <Cell><SiteRowActions site={site} updateSites={updateSites}/></Cell>
           </Row>
         ))}
       </TableBody>

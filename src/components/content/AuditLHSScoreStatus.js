@@ -28,7 +28,7 @@ const AuditLHSScoreStatus = ({ audit }) => {
     return (
       <Flex direction="row" gap="size-100" alignItems="center">
         {scoreNames.map(({ key, label }) => (
-          <AuditLHSScoreBadge score={scores[key]} label={label}/>
+          <AuditLHSScoreBadge key={key} score={scores[key]} label={label}/>
         ))}
       </Flex>
     );

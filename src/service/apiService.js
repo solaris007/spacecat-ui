@@ -48,6 +48,11 @@ export const updateSite = (siteId, siteData) => fetchApi(`sites/${siteId}`, {
   body: JSON.stringify(siteData),
 });
 
+export const toggleLiveStatus = (site) => {
+  const updatedSite = { ...site, isLive: !site.isLive };
+  return updateSite(site.id, { isLive: updatedSite.isLive });
+};
+
 export const deleteSite = (siteId) => fetchApi(`sites/${siteId}`, {
   method: 'DELETE',
 });

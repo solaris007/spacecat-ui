@@ -5,7 +5,6 @@ import {
   Button,
   ButtonGroup,
   Cell,
-  Checkbox,
   Column,
   Content,
   Dialog,
@@ -37,34 +36,40 @@ import Magnify from '@spectrum-icons/workflow/Magnify';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { createSite, deleteSite, getSites, updateSite } from '../service/apiService';
+import { createSite, deleteSite, getSites, toggleLiveStatus, updateSite } from '../service/apiService';
+import { hasAuditEnabledStatus, hasGitHubURLStatus, hasLiveStatus } from '../utils/siteUtils';
 import {
   copyToClipboard,
+  createActionBarItems,
   formatDate,
-  renderEmptyState, renderExternalLink,
+  renderEmptyState,
+  renderExternalLink,
   useDebounce,
 } from '../utils/utils';
+
 import SiteFormDialog from './dialogs/SiteFormDialog';
-import AuditConfigStatus, { isAllAuditsDisabled, isSomeAuditsDisabled } from './content/AuditConfigStatus';
+import AuditConfigStatus from './content/AuditConfigStatus';
 import LiveStatus from './content/LiveStatus';
+import LiveStatusPicker from './pickers/LiveStatusPicker';
+import AuditEnabledPicker from './pickers/AuditEnabledPicker';
+import GitHubURLPicker from './pickers/GitHubURLPicker';
+import Close from '@spectrum-icons/workflow/Close';
 
 
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };
 
 const SitesList = () => {
+  const [auditEnabledStatus, setAuditEnabledStatus] = useState('all');
   const [currentEditingSite, setCurrentEditingSite] = useState(null);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [gitHubURLStatus, setGitHubURLStatus] = useState('all');
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSiteBeingDeleted, setIsSiteBeingDeleted] = useState(false);
   const [isSiteCreateDialogOpen, setIsSiteCreateDialogOpen] = useState(false);
   const [isSiteDeleteDialogOpen, setIsSiteDeleteDialogOpen] = useState(false);
+  const [liveStatus, setLiveStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-  const [showAuditsDisabledOnly, setShowAuditsDisabledOnly] = useState(false);
-  const [showLiveOnly, setShowLiveOnly] = useState(false);
-  const [showNonLiveOnly, setShowNonLiveOnly] = useState(false);
-  const [showSomeAuditsDisabledOnly, setShowSomeAuditsDisabledOnly] = useState(false);
-
 
   const collator = useCollator({ numeric: true });
   const debouncedSearchQuery = useDebounce(searchQuery, 700);
@@ -80,7 +85,7 @@ const SitesList = () => {
     { uid: 'createdAt', name: 'Created At (UTC)', width: '0.6fr' },
   ], []);
 
-  const initialActionBarItems = [
+  const actionBarItemConfig = [
     { key: 'open', label: 'Open', icon: <Magnify/>, maxSelections: 1 },
     { key: 'edit', label: 'Edit', icon: <Edit/>, maxSelections: 1 },
     { key: 'delete', label: 'Delete', icon: <Delete/> },
@@ -88,10 +93,7 @@ const SitesList = () => {
     { key: 'toggle-audits-enabled', label: 'Toggle Audits Enabled', icon: <Play/> },
   ];
 
-  // Dynamically adjust bar items based on the number of selected items and maxSelections
-  const actualActionBarItems = initialActionBarItems.filter(item =>
-    item.maxSelections === undefined || selectedKeys.size <= item.maxSelections
-  );
+  const actionBarItems = createActionBarItems(actionBarItemConfig, selectedKeys);
 
   const sortItems = (items, sortDescriptor) => {
     if (!sortDescriptor) return items;
@@ -118,21 +120,9 @@ const SitesList = () => {
   useEffect(() => {
     let items = sites.items;
 
-    if (showLiveOnly && !showNonLiveOnly) {
-      items = items.filter(item => item.isLive);
-    }
-
-    if (showNonLiveOnly && !showLiveOnly) {
-      items = items.filter(item => !item.isLive);
-    }
-
-    if (showAuditsDisabledOnly) {
-      items = items.filter(item => isAllAuditsDisabled(item));
-    }
-
-    if (showSomeAuditsDisabledOnly) {
-      items = items.filter(item => isSomeAuditsDisabled(item));
-    }
+    items = items.filter(item => hasLiveStatus(item, liveStatus));
+    items = items.filter(item => hasAuditEnabledStatus(item, auditEnabledStatus));
+    items = items.filter(item => hasGitHubURLStatus(item, gitHubURLStatus));
 
     if (debouncedSearchQuery) {
       items = items.filter(item => {
@@ -151,10 +141,9 @@ const SitesList = () => {
   }, [
     sites.items,
     debouncedSearchQuery,
-    showLiveOnly,
-    showNonLiveOnly,
-    showAuditsDisabledOnly,
-    showSomeAuditsDisabledOnly,
+    auditEnabledStatus,
+    gitHubURLStatus,
+    liveStatus,
     columns,
   ]);
 
@@ -190,6 +179,13 @@ const SitesList = () => {
 
   const openSiteCreateDialog = () => {
     setIsSiteCreateDialogOpen(true);
+  }
+
+  const resetControls = () => {
+    setAuditEnabledStatus('all');
+    setGitHubURLStatus('all');
+    setLiveStatus('all');
+    setSearchQuery('');
   }
 
   const handleCreateSite = async (siteData) => {
@@ -267,8 +263,7 @@ const SitesList = () => {
     try {
       for (const siteId of selectedKeys) {
         const currentSite = sites.getItem(siteId);
-        const updatedSite = { ...currentSite, isLive: !currentSite.isLive };
-        await updateSite(siteId, { isLive: updatedSite.isLive });
+        const updatedSite = await toggleLiveStatus(currentSite);
         sites.update(siteId, updatedSite);
       }
       clearTableSelections();
@@ -313,7 +308,7 @@ const SitesList = () => {
   return (
     <div>
       <Flex direction="column" gap="size-200" width="100%">
-        <Flex alignSelf="start" gap="size-150">
+        <Flex alignSelf="start" gap="size-150" wrap="wrap">
           <ActionButton
             aria-label="Create Site"
             alignSelf="start"
@@ -337,34 +332,12 @@ const SitesList = () => {
             value={searchQuery}
             width="auto"
           />
-          <Checkbox
-            isSelected={showLiveOnly}
-            marginEnd="size-200"
-            onChange={setShowLiveOnly}
-          >
-            Live Only
-          </Checkbox>
-          <Checkbox
-            isSelected={showNonLiveOnly}
-            marginEnd="size-200"
-            onChange={setShowNonLiveOnly}
-          >
-            Non-Live Only
-          </Checkbox>
-          <Checkbox
-            isSelected={showAuditsDisabledOnly}
-            marginEnd="size-200"
-            onChange={setShowAuditsDisabledOnly}
-          >
-            All Audits Disabled
-          </Checkbox>
-          <Checkbox
-            isSelected={showSomeAuditsDisabledOnly}
-            marginEnd="size-200"
-            onChange={setShowSomeAuditsDisabledOnly}
-          >
-            Some Audits Disabled
-          </Checkbox>
+          <LiveStatusPicker onSelectionChange={setLiveStatus}/>
+          <AuditEnabledPicker onSelectionChange={setAuditEnabledStatus}/>
+          <GitHubURLPicker onSelectionChange={setGitHubURLStatus}/>
+          <ActionButton onPress={resetControls} aria-label="Reset Controls">
+            <Close size="S"/>
+          </ActionButton>
         </Flex>
         <Flex>
           <Header>Showing {filteredItems.length} of {sites.items.length} Sites</Header>
@@ -411,7 +384,7 @@ const SitesList = () => {
           </TableView>
           <ActionBar
             isEmphasized
-            items={actualActionBarItems}
+            items={actionBarItems}
             selectedItemCount={selectedKeys === 'all' ? 'all' : selectedKeys.size}
             onAction={handleAction}
             onClearSelection={clearTableSelections}

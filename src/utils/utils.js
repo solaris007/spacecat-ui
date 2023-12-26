@@ -68,8 +68,20 @@ export const renderExternalLink = (url, text = url) => {
   );
 }
 
+export const createActionBarItems = (items, selectedKeys) => items.filter(item => {
+  const minSelectionCondition = item.minSelections === undefined || selectedKeys.size >= item.minSelections;
+  const maxSelectionCondition = item.maxSelections === undefined || selectedKeys.size <= item.maxSelections;
+  return minSelectionCondition && maxSelectionCondition;
+});
+
+
 export const formatMs = (value, includeUnit = false) => {
   return `${Math.round(value)}${includeUnit ? ' ms' : ''}`;
+}
+
+export const formatSeconds = (value, includeUnit = false) => {
+  if (Number.isNaN(value)) return '';
+  return `${(value/1000).toFixed(2)}${includeUnit ? ' s' : ''}`;
 }
 
 export const formatBytes = (value, includeUnit = false) => {
@@ -114,4 +126,8 @@ export const formatDate = (dateString) => {
 
 export const createPSIReportURL = (fullAuditRef) => {
   return `https://googlechrome.github.io/lighthouse/viewer/?jsonurl=${fullAuditRef}`;
+}
+
+export const createPSIDiffURL = (fullAuditRefA, fullAuditRefB) => {
+  return `https://adobe-rnd.github.io/lighthouse-diff-viewer/?baseReport=${fullAuditRefA}&compareReport=${fullAuditRefB}`;
 }

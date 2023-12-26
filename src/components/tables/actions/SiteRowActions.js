@@ -7,41 +7,22 @@ import Search from '@spectrum-icons/workflow/Search';
 import Globe from '@spectrum-icons/workflow/Globe';
 import { useNavigate } from 'react-router-dom';
 
-import { createPSIReportURL } from '../../../utils/utils';
+import { createActionHandler } from '../../../utils/siteUtils';
+import Copy from '@spectrum-icons/workflow/Copy';
+import Play from '@spectrum-icons/workflow/Play';
 
 
-function SiteRowActions({ site }) {
-  const { id, baseURL, gitHubURL } = site;
+function SiteRowActions({ site, updateSites }) {
+  const { gitHubURL } = site;
 
   const navigate = useNavigate();
 
-  const handleAction = (action) => {
-    switch (action) {
-      case 'open':
-        navigate(`/sites/${id}`);
-        break;
-      case 'visit-site':
-        window.open(
-          baseURL,
-          '_blank',
-        );
-        break;
-      case 'visit-github':
-        window.open(
-          gitHubURL,
-          '_blank',
-        );
-        break;
-      case 'psi-report':
-        window.open(
-          createPSIReportURL(site.audits[0].fullAuditRef),
-          '_blank',
-        );
-        break;
-      default:
-        break;
-    }
-  }
+  const handleAction = createActionHandler({
+    site,
+    audit: site.audits[0],
+    navigate,
+    updateSites,
+  });
 
   const disabledKeys = [];
   if (!gitHubURL) {
@@ -51,9 +32,11 @@ function SiteRowActions({ site }) {
   return (
     <>
       <ActionMenu onAction={handleAction} isQuiet disabledKeys={disabledKeys}>
-        <Item key="open" textValue="open site"><Search size="S"/><Text>Site Details</Text></Item>
-        <Item key="psi-report" textValue="psi report"><Globe size="S"/><Text>PSI Report</Text></Item>
+        <Item key="open-site" textValue="open site"><Search size="S"/><Text>Site Details</Text></Item>
         <Item key="visit-site" textValue="visit site"><Globe size="S"/><Text>Go To Site</Text></Item>
+        <Item key="toggle-live-status" textValue="toggle live status"><Play size="S"/><Text>Toggle Live Status</Text></Item>
+        <Item key="copy-site-id" textValue="copy site id"><Copy size="S"/><Text>Copy Site ID</Text></Item>
+        <Item key="psi-report" textValue="psi report"><Globe size="S"/><Text>PSI Report</Text></Item>
         <Item key="visit-github" textValue="visit github"><Globe size="S"/><Text>Go To GitHub</Text></Item>
       </ActionMenu>
     </>

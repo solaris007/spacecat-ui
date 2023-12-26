@@ -5,11 +5,13 @@ import React, { useEffect, useState } from 'react';
 import { getSitesWithLatestAudits } from '../../service/apiService';
 import { hasAudits, hasLiveStatus, isAuditDisabled } from '../../utils/siteUtils';
 
-import SitesScoresTable from '../tables/SitesScoresTable';
-import SitesErrorsTable from '../tables/SitesErrorsTable';
-import SitesDisabledTable from '../tables/SitesDisabledTable';
 import AggregatedBarChartPSIScores from '../charts/AggregatedBarChartPSIScores';
-import ScatterPlotLHSPerformance from '../charts/ScatterPlotLHSPerformance';
+import FullscreenChart from '../charts/FullscreenChart';
+import PerformanceScatterPlot from '../charts/PerformanceScatterPlot';
+import SitesDisabledTable from '../tables/SitesDisabledTable';
+import SitesErrorsTable from '../tables/SitesErrorsTable';
+import SitesScoresTable from '../tables/SitesScoresTable';
+import LiveStatusPicker from '../pickers/LiveStatusPicker';
 
 const STRATEGIES = {
   LHS_DESKTOP: 'lhs-desktop',
@@ -17,12 +19,17 @@ const STRATEGIES = {
 }
 
 function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
+  const [disabledSites, setDisabledSites] = useState([]);
+  const [errorSites, setErrorSites] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [liveStatus, setLiveStatus] = useState('all');
+  const [scoredSites, setScoredSites] = useState([]);
   const [sites, setSites] = useState({ 'lhs-desktop': [], 'lhs-mobile': [] });
   const [strategy, setStrategy] = useState(STRATEGIES.LHS_MOBILE);
 
-  onDashboardTitle('Lighthouse Scores');
+  useEffect(() => {
+    onDashboardTitle('Lighthouse Scores');
+  }, [onDashboardTitle]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,16 +53,36 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const strategySites = sites[strategy];
+
+    const filteredSites = strategySites.filter(site => hasLiveStatus(site, liveStatus));
+    const newScoredSites = filteredSites.filter(site => hasAudits(site) && !site.audits[0].isError);
+    const newErrorSites = filteredSites.filter(site => hasAudits(site) && site.audits[0].isError);
+    const newDisabledSites = filteredSites.filter(site => isAuditDisabled(site, strategy));
+
+    // Update state for each table
+    setScoredSites(newScoredSites);
+    setErrorSites(newErrorSites);
+    setDisabledSites(newDisabledSites);
+  }, [sites, strategy, liveStatus]);
+
+
+  const updateSitesState = (updatedSite) => {
+    setSites(prevSites => {
+      const newSites = {...prevSites};
+      for (const strategy in newSites) {
+        newSites[strategy] = newSites[strategy].map(site =>
+          site.id === updatedSite.id ? { ...site, ...updatedSite } : site
+        );
+      }
+      return newSites;
+    });
+  };
+
   if (!isLoaded) {
     return null;
   }
-
-  const strategySites = sites[strategy];
-
-  const filteredSites = strategySites.filter(site => hasLiveStatus(site, liveStatus));
-  const scoredSites = filteredSites.filter(site => hasAudits(site) && !site.audits[0].isError);
-  const errorSites = filteredSites.filter(site => hasAudits(site) && site.audits[0].isError);
-  const disabledSites = filteredSites.filter(site => isAuditDisabled(site, strategy));
 
   return (
     <Grid
@@ -91,35 +118,30 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
             <Item key="lhs-desktop">Desktop</Item>
             <Item key="lhs-mobile">Mobile</Item>
           </Picker>
-          <Picker
-            label="Live Status"
-            labelPosition="side"
-            defaultSelectedKey="all"
-            onSelectionChange={setLiveStatus}
-          >
-            <Item key="all">All</Item>
-            <Item key="live">Live</Item>
-            <Item key="non-live">Non-Live</Item>
-          </Picker>
+          <LiveStatusPicker onSelectionChange={setLiveStatus}/>
         </Flex>
       </View>
       <View gridArea="charts">
-        <Flex direction="row" justifyContent="start" alignItems="center" gap="size-150">
+        <Flex direction="row" justifyContent="start" alignItems="center" gap="size-300">
           <AggregatedBarChartPSIScores sites={scoredSites}/>
-          <ScatterPlotLHSPerformance sites={sites}/>
+          <FullscreenChart
+            title="Performance Scatter Plot"
+            chart={PerformanceScatterPlot}
+            chartProps={{ sites }}
+            />
         </Flex>
       </View>
       <View gridArea="table-scores">
         <h2>Scores ({scoredSites.length})</h2>
-        <SitesScoresTable sites={scoredSites}/>
+        <SitesScoresTable sites={scoredSites} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-errors">
         <h2>Errors ({errorSites.length})</h2>
-        <SitesErrorsTable sites={errorSites}/>
+        <SitesErrorsTable sites={errorSites} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-disabled">
         <h2>Disabled ({disabledSites.length})</h2>
-        <SitesDisabledTable sites={disabledSites}/>
+        <SitesDisabledTable sites={disabledSites} updateSites={updateSitesState}/>
       </View>
     </Grid>
   );

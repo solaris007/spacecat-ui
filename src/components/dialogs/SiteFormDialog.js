@@ -12,9 +12,10 @@ import {
   Heading,
   TextField,
 } from '@adobe/react-spectrum';
-import { hasText, isValidUrl } from '@adobe/spacecat-shared-utils';
 
 import { AUDIT_TYPES } from '../../utils/utils';
+import { isValidGitHubURL } from '../../utils/siteUtils';
+import { hasText } from '@adobe/spacecat-shared-utils';
 
 const EMPTY_SITE = {
   baseURL: '',
@@ -58,7 +59,7 @@ function SiteFormDialog({ isOpen, onClose, onSubmit, siteData }) {
   };
 
   const validateGitHubURL = (value) => {
-    return !hasText(value) || (isValidUrl(value) && value.startsWith('https://github.com/')) ? null : 'Please enter a valid GitHub repository URL';
+    return !hasText(value) || isValidGitHubURL(value) ? null : 'Please enter a valid GitHub repository URL';
   }
 
   return (

@@ -3,8 +3,6 @@ import {
   ContextualHelp,
   Flex,
   Heading,
-  Item,
-  Picker,
   Text,
 } from '@adobe/react-spectrum';
 import {
@@ -17,20 +15,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import React, { useState } from 'react';
+import React from 'react';
 
-const aggregateData = (sites, liveStatus) => {
-  switch(liveStatus) {
-    case 'live':
-      sites = sites.filter(site => site.isLive);
-      break;
-    case 'non-live':
-      sites = sites.filter(site => !site.isLive);
-      break;
-    default:
-      break;
-  }
-
+const aggregateData = (sites) => {
   // Initialize an object to store the count for each score range and metric
   const ranges = {
     '0-0.2': { 'best-practices': 0, performance: 0, seo: 0, accessibility: 0 },
@@ -63,38 +50,31 @@ const aggregateData = (sites, liveStatus) => {
 };
 
 function AggregatedBarChartPSIScores({ sites }) {
-  const [liveStatus, setLiveStatus] = useState('all');
-  const aggregatedData = aggregateData(sites, liveStatus);
+  const aggregatedData = aggregateData(sites);
 
   return (
-    <Flex direction="column" gap="size-200">
+    <Flex direction="column" gap="size-200" width="100%">
       <Flex direction="row" gap="size-200">
         <Text><strong>Aggregated Scores</strong></Text>
         <ContextualHelp variant="info">
           <Heading>Aggregated Scores Bar Chart</Heading>
           <Content>
             <Text>
-              This chart provides a visual representation of how different websites score in various performance categories. Instead of showing a bar for each individual site, we've aggregated the data into distinct performance score ranges (for example, 0-0.2, 0.2-0.4, etc.). Each bar in the chart represents the number of sites that fall into these score ranges.
+              This chart shows the aggregated scores based on the latest audit for each site. The scores are grouped
+              into ranges of 0.2. For example,
+              the first bar shows the number of sites with a score between 0 and 0.2 for the four lighthouse scores. The
+              second bar shows the number of sites with a score between 0.2 and 0.4 for the four lighthouse scores, and
+              so on.
             </Text>
           </Content>
         </ContextualHelp>
-        <Picker
-          label="Live Status"
-          width="size-2400"
-          onSelectionChange={setLiveStatus}
-          selectedKey={liveStatus}
-        >
-          <Item key="all">All</Item>
-          <Item key="live">Live</Item>
-          <Item key="non-live">Not Live</Item>
-        </Picker>
       </Flex>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart width={600} height={300} data={aggregatedData}>
           <CartesianGrid strokeDasharray="3 3"/>
           <XAxis dataKey="name"/>
           <YAxis domain={[0, Math.ceil(sites.length / 10) * 10]}/>
-          <Tooltip/>
+          <Tooltip contentStyle={{ backgroundColor: '#292929', color: 'white' }}/>
           <Legend/>
           <Bar dataKey="performance" fill="rgb(216, 181, 0)"/>
           <Bar dataKey="seo" fill="rgb(227, 69, 137)"/>

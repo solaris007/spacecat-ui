@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Badge, Button, Flex, Item, Picker, Text } from '@adobe/react-spectrum';
+import { Flex, Item, Picker } from '@adobe/react-spectrum';
 import AuthContext from '../auth/AuthContext';
 
 const EnvironmentSwitcher = () => {

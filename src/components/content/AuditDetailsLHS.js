@@ -15,6 +15,7 @@ import LiveStatus from './LiveStatus';
 import ErrorStatus from './ErrorStatus';
 import AuditErrorLHS from './AuditErrorLHS';
 import AuditLHSScoreStatus from './AuditLHSScoreStatus';
+import AuditLHSTotalBlockingTimeBadge from './AuditLHSTotalBlockingTimeBadge';
 
 function AuditDetailsLHS({ audit }) {
   return (
@@ -79,7 +80,13 @@ function AuditDetailsLHS({ audit }) {
         ) : (
           <Flex direction="column" gap="size-150">
             <Heading level={3}>Scores</Heading>
-            <AuditLHSScoreStatus audit={audit}/>
+            <AuditLHSScoreStatus audit={audit} size="L"/>
+            <Heading level={3}>Total Blocking Time</Heading>
+            <AuditLHSTotalBlockingTimeBadge
+              totalBlockingTime={audit.auditResult.totalBlockingTime}
+              label="Total Blocking Time"
+              size="L"
+            />
             <Heading level={3}>Third Parties</Heading>
             <TableView aria-label="Third Parties" height="size-3600">
               <TableHeader>

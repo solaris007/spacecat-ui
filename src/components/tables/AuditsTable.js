@@ -12,7 +12,7 @@ import {
 } from '@adobe/react-spectrum';
 import Compare from '@spectrum-icons/workflow/Compare';
 import Globe from '@spectrum-icons/workflow/Globe';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { createActionHandler } from '../../utils/siteUtils';
@@ -24,14 +24,26 @@ import ErrorStatus from '../content/ErrorStatus';
 import AuditsRowActions from './actions/AuditsRowActions';
 
 const actionBarItemConfig = [
+  { key: 'select-2', label: 'Select 2 audits to compare...', maxSelections: 1 },
+  { key: 'select-2', label: 'Select 2 audits to compare...', minSelections: 3 },
   { key: 'psi-diff', label: 'Compare PSI Reports', icon: <Compare/>, maxSelections: 2, minSelections: 2 },
-  { key: 'psi-report', label: 'PSI Report', icon: <Globe/>, maxSelections: 1 },
 ];
 
 function AuditsTable({ auditType, audits }) {
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [selectedAudits, setSelectedAudits] = useState([]);
+  const [disabledKeys, setDisabledKeys] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // disabled all other keys if 2 have been selected
+    if (selectedKeys.size > 1) {
+      // add all other keys to disabledKeys
+      setDisabledKeys(audits.map((audit, index) => !selectedKeys.has(`${index}`) && `${index}`));
+    } else {
+      setDisabledKeys([]);
+    }
+  }, [selectedKeys, audits]);
 
   const actionBarItems = createActionBarItems(actionBarItemConfig, selectedKeys);
 
@@ -40,15 +52,16 @@ function AuditsTable({ auditType, audits }) {
   }
 
   const handleSelectionChange = (keys) => {
-    if (keys === 'all') {
-      setSelectedKeys(keys);
-    } else {
+    if (keys !== 'all') {
       setSelectedKeys(new Set(keys));
     }
     setSelectedAudits(audits.filter((audit, index) => keys === 'all' || keys.has(`${index}`)));
   }
 
-  const handleAction = createActionHandler({ audits: selectedAudits.reverse(), navigate })
+  const handleAction = createActionHandler({
+    audits: selectedAudits.reverse(),
+    navigate,
+  })
 
   return (
     <Flex direction="column" gap="size-100">
@@ -56,6 +69,7 @@ function AuditsTable({ auditType, audits }) {
       <ActionBarContainer height="size-3600">
         <TableView
           aria-label="Audit List"
+          disabledKeys={disabledKeys}
           onSelectionChange={handleSelectionChange}
           selectedKeys={selectedKeys}
           selectionMode="multiple"

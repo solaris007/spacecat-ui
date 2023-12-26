@@ -12,6 +12,7 @@ import { formatSeconds, renderExternalLink } from '../../utils/utils';
 
 import SiteRowActions from './actions/SiteRowActions';
 import AuditLHSScoreBadge from '../content/AuditLHSScoreBadge';
+import AuditLHSTotalBlockingTimeBadge from '../content/AuditLHSTotalBlockingTimeBadge';
 
 function SitesScoresTable({ sites, auditType, updateSites }) {
   const [sortDescriptor, setSortDescriptor] = useState({ column: 'performance', direction: 'ascending' });
@@ -62,12 +63,17 @@ function SitesScoresTable({ sites, auditType, updateSites }) {
         {sortedSites && sortedSites.map((site, index) => (
           <Row key={index}>
             <Cell>{renderExternalLink(site.baseURL)}</Cell>
-            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.performance} label={index} /></Cell>
-            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.seo} label={index} /></Cell>
-            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.accessibility} label={index} /></Cell>
-            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores['best-practices']} label={index} /></Cell>
-            <Cell>{formatSeconds(site.audits[0].auditResult.totalBlockingTime)}</Cell>
-            <Cell><SiteRowActions site={site} auditType={auditType} audit={site.audits[0]} updateSites={updateSites}/></Cell>
+            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.performance} label={index}/></Cell>
+            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.seo} label={index}/></Cell>
+            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.accessibility} label={index}/></Cell>
+            <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores['best-practices']} label={index}/></Cell>
+            <Cell>
+              <AuditLHSTotalBlockingTimeBadge
+                totalBlockingTime={site.audits[0].auditResult.totalBlockingTime}
+              />
+            </Cell>
+            <Cell><SiteRowActions site={site} auditType={auditType} audit={site.audits[0]}
+                                  updateSites={updateSites}/></Cell>
           </Row>
         ))}
       </TableBody>

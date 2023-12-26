@@ -1,18 +1,18 @@
-import { formatPercent } from '../../utils/utils';
+import { formatPercent, formatSeconds } from '../../utils/utils';
 import { Badge } from '@adobe/react-spectrum';
 import React from 'react';
 
-const getScoreVariant = (score) => {
-  if (score >= 0.9) {
+const getBadgeVariant = (totalBlockingTime) => {
+  if (totalBlockingTime <= 200) {
     return 'positive';
-  } else if (score >= 0.5) {
+  } else if (totalBlockingTime <= 500) {
     return 'yellow';
   } else {
     return 'negative';
   }
 };
 
-function AuditLHSScoreBadge({ score, label, size }) {
+function AuditLHSTotalBlockingTimeBadge({ totalBlockingTime, label, size }) {
   const style = size === 'L' ? { 'font-weight': 'bold', 'font-size': '2em' } : {};
   const width = size === 'L' ? '' : 'size-600';
   const strLabel = size === 'L' ? `${label}: ` : '';
@@ -20,12 +20,12 @@ function AuditLHSScoreBadge({ score, label, size }) {
     <Badge
       width={width}
       aria-label={label}
-      variant={getScoreVariant(score)}
+      variant={getBadgeVariant(totalBlockingTime)}
       UNSAFE_style={style}
     >
-      {strLabel}{formatPercent(score)}
+      {strLabel}{formatSeconds(totalBlockingTime)} s
     </Badge>
   );
 }
 
-export default AuditLHSScoreBadge;
+export default AuditLHSTotalBlockingTimeBadge;

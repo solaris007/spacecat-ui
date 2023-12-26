@@ -41,7 +41,7 @@ function PerformanceScatterPlot({ sites, setContextualHelpText, isFullScreen }) 
   useEffect(() => {
     setContextualHelpText(
       'This chart shows the performance scores of the latest Lighthouse audits for each site. ' +
-      'The x-axis represents the mobile score, and the y-axis represents the desktop score. ' +
+      'The x-axis represents the mobile totalBlockingTime, and the y-axis represents the desktop totalBlockingTime. ' +
       'The red line represents equal performance between mobile and desktop. ' +
       'The green area represents the 90% area, where the mobile and desktop scores are within 10% of each other.',
     );

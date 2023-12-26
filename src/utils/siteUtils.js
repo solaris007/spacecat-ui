@@ -1,8 +1,8 @@
 import { createPSIDiffURL, createPSIReportURL } from './utils';
 import { ToastQueue } from '@react-spectrum/toast';
-import { toggleLiveStatus } from '../service/apiService';
+import { toggleAllAuditsEnabled, toggleAuditTypeEnabled, toggleLiveStatus } from '../service/apiService';
 import { isAllAuditsDisabled, isSomeAuditsDisabled } from '../components/content/AuditConfigStatus';
-import { hasText, isValidUrl } from '@adobe/spacecat-shared-utils';
+import { isValidUrl } from '@adobe/spacecat-shared-utils';
 
 export function hasAudits(site) {
   return Array.isArray(site.audits) && site.audits.length > 0;
@@ -59,8 +59,10 @@ export function isAuditDisabled(site, strategy) {
 export function createActionHandler({
                                       site,
                                       audits,
+                                      auditType,
                                       navigate,
                                       updateSites,
+                                      setIsAuditDetailsDialogOpen,
                                     }) {
   return async (action) => {
     switch (action) {
@@ -97,9 +99,22 @@ export function createActionHandler({
         ToastQueue.positive('Copied Site ID to clipboard', { timeout: 5000 });
         break;
       case 'toggle-live-status':
-        const updatedSite = await toggleLiveStatus(site);
-        updateSites(updatedSite);
-        ToastQueue.positive(`Toggled Live Status to ${updatedSite.isLive ? 'Live' : 'Non-Live'}`, { timeout: 5000 });
+        const updatedLiveStatus = await toggleLiveStatus(site);
+        updateSites(updatedLiveStatus);
+        ToastQueue.positive(`Toggled Live Status to ${updatedLiveStatus.isLive ? 'Live' : 'Non-Live'}`, { timeout: 5000 });
+        break;
+      case 'audit-details':
+        setIsAuditDetailsDialogOpen(true);
+        break;
+      case 'toggle-all-audits-enabled':
+        const updatedAllAuditsEnabled = await toggleAllAuditsEnabled(site);
+        updateSites(updatedAllAuditsEnabled);
+        ToastQueue.positive(`Toggled All Audits to ${!isAllAuditsDisabled(updatedAllAuditsEnabled) ? 'Enabled' : 'Disabled'}`, { timeout: 5000 });
+        break;
+      case 'toggle-audit-type-enabled':
+        const updatedAuditTypeEnabled = await toggleAuditTypeEnabled(site, auditType);
+        updateSites(updatedAuditTypeEnabled);
+        ToastQueue.positive(`Toggled ${auditType} to ${!isAuditDisabled(updatedAuditTypeEnabled, auditType) ? 'Enabled' : 'Disabled'}`, { timeout: 5000 });
         break;
       default:
         break;

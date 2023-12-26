@@ -8,12 +8,12 @@ import {
 } from '@adobe/react-spectrum';
 import React, { useMemo, useState } from 'react';
 
-import { formatMs, formatSeconds, renderExternalLink } from '../../utils/utils';
+import { formatSeconds, renderExternalLink } from '../../utils/utils';
 
 import SiteRowActions from './actions/SiteRowActions';
 import AuditLHSScoreBadge from '../content/AuditLHSScoreBadge';
 
-function SitesScoresTable({ sites, updateSites }) {
+function SitesScoresTable({ sites, auditType, updateSites }) {
   const [sortDescriptor, setSortDescriptor] = useState({ column: 'performance', direction: 'ascending' });
 
   const sortedSites = useMemo(() => {
@@ -67,7 +67,7 @@ function SitesScoresTable({ sites, updateSites }) {
             <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores.accessibility} label={index} /></Cell>
             <Cell><AuditLHSScoreBadge score={site.audits[0].auditResult.scores['best-practices']} label={index} /></Cell>
             <Cell>{formatSeconds(site.audits[0].auditResult.totalBlockingTime)}</Cell>
-            <Cell><SiteRowActions site={site} updateSites={updateSites}/></Cell>
+            <Cell><SiteRowActions site={site} auditType={auditType} audit={site.audits[0]} updateSites={updateSites}/></Cell>
           </Row>
         ))}
       </TableBody>

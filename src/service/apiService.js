@@ -1,3 +1,5 @@
+import { isAuditDisabled } from '../utils/siteUtils';
+
 const BASE_URL = 'https://spacecat.experiencecloud.live/api';
 
 const createHeaders = (apiKey) => ({
@@ -52,6 +54,34 @@ export const toggleLiveStatus = (site) => {
   const updatedSite = { ...site, isLive: !site.isLive };
   return updateSite(site.id, { isLive: updatedSite.isLive });
 };
+
+export const toggleAllAuditsEnabled = (site) => {
+  const updatedSite = {
+    ...site,
+    auditConfig: {
+      ...site.auditConfig,
+      auditsDisabled: !site.auditConfig.auditsDisabled
+    }
+  };
+  return updateSite(site.id, { auditConfig: updatedSite.auditConfig });
+};
+
+export const toggleAuditTypeEnabled = (site, auditType) => {
+  const updatedSite = {
+    ...site,
+    auditConfig: {
+      ...site.auditConfig,
+      auditTypeConfigs: {
+        ...site.auditConfig.auditTypeConfigs,
+        [auditType]: {
+          ...site.auditConfig.auditTypeConfigs[auditType],
+          disabled: !site.auditConfig.auditTypeConfigs[auditType].disabled
+        }
+      }
+    }
+  };
+  return updateSite(site.id, { auditConfig: updatedSite.auditConfig });
+}
 
 export const deleteSite = (siteId) => fetchApi(`sites/${siteId}`, {
   method: 'DELETE',

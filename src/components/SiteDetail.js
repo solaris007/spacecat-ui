@@ -284,7 +284,7 @@ const SiteDetails = () => {
               <Flex direction="column" gap="size-300">
                 <Flex direction="row" gap="size-300">
                   <View width="50%">
-                    <Heading level={3}>Scores</Heading>
+                    <Heading level={3}>Scores & TBT</Heading>
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={chartData.scoresData}>
                         <CartesianGrid strokeDasharray="3 3"/>

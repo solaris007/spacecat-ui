@@ -1,6 +1,5 @@
 import {
-  Button,
-  ButtonGroup,
+  ActionButton,
   Content,
   Dialog,
   DialogContainer,
@@ -8,12 +7,14 @@ import {
   Flex,
   Heading,
   ProgressCircle,
+  Text,
 } from '@adobe/react-spectrum';
 import { ToastQueue } from '@react-spectrum/toast';
 import React, { useEffect, useState } from 'react';
 
 import { getAuditForSite } from '../../service/apiService';
 import AuditDetailsLHS from '../content/AuditDetailsLHS';
+import Close from '@spectrum-icons/workflow/Close';
 
 function AuditDetailsLHSDialog({ isOpen, onClose, audit }) {
   const { auditedAt, auditType, siteId } = audit;
@@ -48,7 +49,12 @@ function AuditDetailsLHSDialog({ isOpen, onClose, audit }) {
         onClose={onClose}
         aria-label="Audit Details"
       >
-        <Heading level={3}>Audit Details</Heading>
+        <Heading>
+          <Flex direction="row" alignItems="center" justifyContent="space-between" gap="size-200">
+            <Text>Audit Details</Text>
+            <ActionButton onPress={onClose} isQuiet><Close size="L"/></ActionButton>
+          </Flex>
+        </Heading>
         <Divider/>
         <Content>
           <Flex direction="column" gap="size-150">
@@ -58,9 +64,6 @@ function AuditDetailsLHSDialog({ isOpen, onClose, audit }) {
               <AuditDetailsLHS audit={auditDetails}/>
             )}
             <Divider size="S"/>
-            <ButtonGroup alignSelf="end">
-              <Button variant="accent" onPress={onClose}>Close</Button>
-            </ButtonGroup>
           </Flex>
         </Content>
       </Dialog>

@@ -123,25 +123,25 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
       </View>
       <View gridArea="charts">
         <Flex direction="row" justifyContent="start" alignItems="center" gap="size-300">
-          <AggregatedBarChartPSIScores sites={scoredSites}/>
           <FullscreenChart
             title="Performance Scatter Plot"
             chart={PerformanceScatterPlot}
             chartProps={{ sites }}
             />
+          <AggregatedBarChartPSIScores sites={scoredSites}/>
         </Flex>
       </View>
       <View gridArea="table-scores">
         <h2>Scores ({scoredSites.length})</h2>
-        <SitesScoresTable sites={scoredSites} updateSites={updateSitesState}/>
+        <SitesScoresTable sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-errors">
         <h2>Errors ({errorSites.length})</h2>
-        <SitesErrorsTable sites={errorSites} updateSites={updateSitesState}/>
+        <SitesErrorsTable sites={errorSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-disabled">
         <h2>Disabled ({disabledSites.length})</h2>
-        <SitesDisabledTable sites={disabledSites} updateSites={updateSitesState}/>
+        <SitesDisabledTable sites={disabledSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
     </Grid>
   );

@@ -12,7 +12,7 @@ import { formatLighthouseError, renderExternalLink } from '../../utils/utils';
 
 import SiteRowActions from './actions/SiteRowActions';
 
-function SitesErrorsTable({ sites, updateSites }) {
+function SitesErrorsTable({ sites, auditType, updateSites }) {
   return (
     <TableView
       aria-label="Error List"
@@ -29,7 +29,7 @@ function SitesErrorsTable({ sites, updateSites }) {
           <Row key={index}>
             <Cell>{renderExternalLink(site.baseURL)}</Cell>
             <Cell>{formatLighthouseError(site.audits[0].auditResult.runtimeError)}</Cell>
-            <Cell><SiteRowActions site={site} updateSites={updateSites}/></Cell>
+            <Cell><SiteRowActions site={site} auditType={auditType} audit={site.audits[0]} updateSites={updateSites}/></Cell>
           </Row>
         ))}
       </TableBody>

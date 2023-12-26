@@ -54,6 +54,7 @@ import LiveStatusPicker from './pickers/LiveStatusPicker';
 import AuditEnabledPicker from './pickers/AuditEnabledPicker';
 import GitHubURLPicker from './pickers/GitHubURLPicker';
 import Close from '@spectrum-icons/workflow/Close';
+import SiteRowActions from './tables/actions/SiteRowActions';
 
 
 const DEFAULT_SORT_DESCRIPTOR = { column: 'updatedAt', direction: 'descending' };
@@ -81,19 +82,20 @@ const SitesList = () => {
     { uid: 'gitHubURL', name: 'GitHub URL' },
     { uid: 'isLive', name: 'Live', width: '0.2fr' },
     { uid: 'auditConfig', name: 'Audits', width: '0.3fr' },
-    { uid: 'updatedAt', name: 'Updated At (UTC)', width: '0.6fr' },
-    { uid: 'createdAt', name: 'Created At (UTC)', width: '0.6fr' },
+    { uid: 'updatedAt', name: 'Updated At (UTC)', width: '0.5fr' },
+    { uid: 'createdAt', name: 'Created At (UTC)', width: '0.5fr' },
+    { uid: 'actions', name: '', width: '0.2fr' },
   ], []);
 
-  const actionBarItemConfig = [
+  const actionBarItemConfig = useMemo(() => [
     { key: 'open', label: 'Open', icon: <Magnify/>, maxSelections: 1 },
     { key: 'edit', label: 'Edit', icon: <Edit/>, maxSelections: 1 },
     { key: 'delete', label: 'Delete', icon: <Delete/> },
     { key: 'toggle-live-status', label: 'Toggle Live Status', icon: <Globe/> },
     { key: 'toggle-audits-enabled', label: 'Toggle Audits Enabled', icon: <Play/> },
-  ];
+  ], []);
 
-  const actionBarItems = createActionBarItems(actionBarItemConfig, selectedKeys);
+  const actionBarItems = useMemo(() => createActionBarItems(actionBarItemConfig, selectedKeys), []);
 
   const sortItems = (items, sortDescriptor) => {
     if (!sortDescriptor) return items;
@@ -188,6 +190,10 @@ const SitesList = () => {
     setSearchQuery('');
   }
 
+  const handleSiteUpdate = (updatedSite) => {
+    sites.update(updatedSite.id, updatedSite);
+  }
+
   const handleCreateSite = async (siteData) => {
     console.log('Creating site with data:', siteData);
     try {
@@ -207,7 +213,7 @@ const SitesList = () => {
       const currentSite = sites.getItem(siteId);
       await updateSite(siteId, siteData);
       const updatedSite = { ...currentSite, ...siteData };
-      sites.update(siteId, updatedSite);
+      handleSiteUpdate(updatedSite);
       clearTableSelections();
       ToastQueue.positive(`Site ${siteId} updated`, { timeout: 5000 });
     } catch (error) {
@@ -249,7 +255,7 @@ const SitesList = () => {
           }
         };
         await updateSite(siteId, { auditConfig: updatedSite.auditConfig });
-        sites.update(siteId, updatedSite);
+        handleSiteUpdate(updatedSite);
       }
       clearTableSelections();
       ToastQueue.positive(`Audits toggled for ${selectedKeys.size} site(s)`, { timeout: 5000 });
@@ -264,7 +270,7 @@ const SitesList = () => {
       for (const siteId of selectedKeys) {
         const currentSite = sites.getItem(siteId);
         const updatedSite = await toggleLiveStatus(currentSite);
-        sites.update(siteId, updatedSite);
+        handleSiteUpdate(updatedSite);
       }
       clearTableSelections();
       ToastQueue.positive(`Live status toggled for ${selectedKeys.size} site(s)`, { timeout: 5000 });
@@ -374,11 +380,14 @@ const SitesList = () => {
                 <Row>
                   {columnKey => (
                     <Cell>
-                      {renderCellContent(item, columnKey)}
+                      {columnKey === 'actions' ? (
+                        <SiteRowActions site={item} updateSites={handleSiteUpdate}/>
+                      ) : (
+                        renderCellContent(item, columnKey)
+                      )}
                     </Cell>
                   )}
                 </Row>
-
               )}
             </TableBody>
           </TableView>

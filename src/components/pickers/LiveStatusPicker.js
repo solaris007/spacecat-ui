@@ -6,6 +6,7 @@ function LiveStatusPicker({ onSelectionChange }) {
     <Picker
       label="Live Status"
       labelPosition="side"
+      name="live-status-picker"
       defaultSelectedKey="all"
       onSelectionChange={onSelectionChange}
     >

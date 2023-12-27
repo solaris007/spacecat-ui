@@ -1,4 +1,4 @@
-import { Flex, Grid, Item, Picker, View } from '@adobe/react-spectrum';
+import { ActionButton, Flex, Grid, Item, Picker, Tooltip, TooltipTrigger, View } from '@adobe/react-spectrum';
 import { ToastQueue } from '@react-spectrum/toast';
 import React, { useEffect, useState } from 'react';
 
@@ -12,6 +12,8 @@ import SitesDisabledTable from '../tables/SitesDisabledTable';
 import SitesErrorsTable from '../tables/SitesErrorsTable';
 import SitesScoresTable from '../tables/SitesScoresTable';
 import LiveStatusPicker from '../pickers/LiveStatusPicker';
+import Refresh from '@spectrum-icons/workflow/Refresh';
+import SitesPSILeaderboard from '../tables/SitesPSILeaderboard';
 
 const STRATEGIES = {
   LHS_DESKTOP: 'lhs-desktop',
@@ -32,26 +34,27 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
   }, [onDashboardTitle]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoaded(false);
-        onLoadingComplete(true);
-        const data = {};
-        for (const auditType of Object.values(STRATEGIES)) {
-          onLoadingText(`Loading Lighthouse Scores (${auditType})...`);
-          data[auditType] = await getSitesWithLatestAudits(auditType);
-        }
-        setSites(data);
-        setIsLoaded(true);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        ToastQueue.negative('Error fetching data', { timeout: 5000 });
-      } finally {
-        onLoadingComplete(false);}
-    };
-
-    fetchData();
+    refreshData();
   }, []);
+
+  const refreshData = async () => {
+    try {
+      setIsLoaded(false);
+      onLoadingComplete(true);
+      const data = {};
+      for (const auditType of Object.values(STRATEGIES)) {
+        onLoadingText(`Loading Lighthouse Scores (${auditType})...`);
+        data[auditType] = await getSitesWithLatestAudits(auditType);
+      }
+      setSites(data);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      ToastQueue.negative('Error fetching data', { timeout: 5000 });
+    } finally {
+      onLoadingComplete(false);
+    }
+  };
 
   useEffect(() => {
     const strategySites = sites[strategy];
@@ -66,7 +69,6 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
     setErrorSites(newErrorSites);
     setDisabledSites(newDisabledSites);
   }, [sites, strategy, liveStatus]);
-
 
   const updateSitesState = (updatedSite) => {
     setSites(prevSites => {
@@ -90,6 +92,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         base: [
           'controls',
           'charts',
+          'table-winners',
           'table-scores',
           'table-errors',
           'table-disabled',
@@ -97,6 +100,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         M: [
           'controls controls',
           'charts charts',
+          'table-winners table-winners',
           'table-scores table-errors',
           'table-disabled table-disabled'
         ],
@@ -111,6 +115,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         <Flex direction="row" justifyContent="start" alignItems="center" gap="size-150">
           <Picker
             label="Strategy"
+            name="strategy-picker"
             labelPosition="side"
             defaultSelectedKey="lhs-mobile"
             onSelectionChange={setStrategy}
@@ -118,6 +123,12 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
             <Item key="lhs-desktop">Desktop</Item>
             <Item key="lhs-mobile">Mobile</Item>
           </Picker>
+          <TooltipTrigger>
+            <ActionButton onPress={refreshData} aria-label="Refresh Sites">
+              <Refresh size="S"/>
+            </ActionButton>
+            <Tooltip>Refresh Sites</Tooltip>
+          </TooltipTrigger>
           <LiveStatusPicker onSelectionChange={setLiveStatus}/>
         </Flex>
       </View>
@@ -134,6 +145,10 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
       <View gridArea="table-scores">
         <h2>Scores ({scoredSites.length})</h2>
         <SitesScoresTable sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
+      </View>
+      <View gridArea="table-winners">
+        <h2>Winners ({scoredSites.length})</h2>
+        <SitesPSILeaderboard showWinners={true} sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-errors">
         <h2>Errors ({errorSites.length})</h2>

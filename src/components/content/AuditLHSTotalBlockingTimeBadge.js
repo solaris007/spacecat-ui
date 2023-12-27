@@ -1,4 +1,4 @@
-import { formatPercent, formatSeconds } from '../../utils/utils';
+import { formatSeconds } from '../../utils/utils';
 import { Badge } from '@adobe/react-spectrum';
 import React from 'react';
 
@@ -13,7 +13,7 @@ const getBadgeVariant = (totalBlockingTime) => {
 };
 
 function AuditLHSTotalBlockingTimeBadge({ totalBlockingTime, label, size }) {
-  const style = size === 'L' ? { 'font-weight': 'bold', 'font-size': '2em' } : {};
+  const style = size === 'L' ? { fontWeight: 'bold', fontSize: '2em' } : {};
   const width = size === 'L' ? '' : 'size-600';
   const strLabel = size === 'L' ? `${label}: ` : '';
   return (

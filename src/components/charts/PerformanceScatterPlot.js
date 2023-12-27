@@ -53,9 +53,9 @@ function PerformanceScatterPlot({ sites, setContextualHelpText, isFullScreen }) 
       .map((mobileSite, index) => {
         const desktopSite = desktopSites.find(ds => ds.baseURL === mobileSite.baseURL);
         return desktopSite ? {
-          name: mobileSite.baseURL,
-          desktopScore: Math.round(desktopSite.audits[0].auditResult.scores.performance * 100),
-          mobileScore: Math.round(mobileSite.audits[0].auditResult.scores.performance * 100),
+          name: `${mobileSite.baseURL} (${index})`,
+          desktopScore: Math.round(desktopSite.audits[0].auditResult.scores.performance * 100) - (0.001 * index),
+          mobileScore: Math.round(mobileSite.audits[0].auditResult.scores.performance * 100) - (0.001 * index)
         } : null;
       })
       .filter(Boolean); // Filter out null values
@@ -77,6 +77,7 @@ function PerformanceScatterPlot({ sites, setContextualHelpText, isFullScreen }) 
           domain={[0, 100]}
           name="Mobile Score"
           type="number"
+          ticks={[0, 25, 50, 75, 100]}
           unit="%"
         >
           <Label value="Mobile Score" offset={40} position="insideLeft"/>
@@ -85,6 +86,7 @@ function PerformanceScatterPlot({ sites, setContextualHelpText, isFullScreen }) 
           type="number"
           dataKey="desktopScore"
           name="Desktop Score"
+          ticks={[0, 25, 50, 75, 100]}
           unit="%"
           domain={[0, 100]}
         >

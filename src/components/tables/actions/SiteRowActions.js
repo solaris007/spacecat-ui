@@ -15,7 +15,6 @@ import AuditDetailsLHSDialog from '../../dialogs/AuditDetailsLHSDialog';
 import { Section } from 'react-stately';
 import { isAllAuditsDisabled } from '../../content/AuditConfigStatus';
 
-
 function SiteRowActions({ site, auditType, audit, updateSites }) {
   const [isAuditDetailsDialogOpen, setIsAuditDetailsDialogOpen] = useState(false);
   const { gitHubURL } = site;
@@ -56,7 +55,7 @@ function SiteRowActions({ site, auditType, audit, updateSites }) {
           <Item key="copy-site-id" textValue="copy site id"><Copy size="S"/><Text>Copy Site ID</Text></Item>
         </Section>
         <Section title="Audit">
-          <Item key="audit-details" textValue="open site"><Search size="S"/><Text>Audit Details (latest)</Text></Item>
+          <Item key="audit-details" textValue="audit details"><Search size="S"/><Text>Audit Details (latest)</Text></Item>
           <Item key="psi-report" textValue="psi report"><Globe size="S"/><Text>PSI Report</Text></Item>
         </Section>
         <Section title="Actions">

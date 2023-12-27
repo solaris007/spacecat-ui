@@ -88,9 +88,19 @@ export const formatBytes = (value, includeUnit = false) => {
   return `${Math.round(value / 1024)}${includeUnit ? ' KB' : ''}`;
 }
 
-export const formatPercent = (value) => {
-  return `${Math.round(value * 100)}%`;
+export const formatPercent = (value, factor = 100) => {
+  return `${Math.round(value * factor)}%`;
 };
+
+export const formatSigned = (number, precision = 0) => {
+  if (number === 0) {
+    return '±0';
+  } else if (number > 0) {
+    return `+${number.toFixed(precision)}`;
+  } else {
+    return number.toFixed(precision);
+  }
+}
 
 export const formatLighthouseError = (runtimeError) => {
   const { code, message } = runtimeError;

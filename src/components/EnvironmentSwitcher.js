@@ -9,6 +9,7 @@ const EnvironmentSwitcher = () => {
     <Flex gap="size-200" alignItems="center">
       <Picker
         label="Environment"
+        name="environment-picker"
         labelPosition="side"
         selectedKey={environment}
         onSelectionChange={switchEnvironment}

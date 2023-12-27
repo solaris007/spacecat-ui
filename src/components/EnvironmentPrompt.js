@@ -36,6 +36,7 @@ const EnvironmentPrompt = () => {
 
       <Picker
         label="Environment"
+        name="environment-picker"
         width="size-2400"
         onSelectionChange={setEnvironment}
         selectedKey={environment}
@@ -46,6 +47,7 @@ const EnvironmentPrompt = () => {
 
       <TextField
         label="API Key"
+        name="api-key"
         type="text"
         value={apiKey}
         onChange={setApiKey}

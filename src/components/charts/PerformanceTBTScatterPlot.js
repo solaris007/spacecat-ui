@@ -1,3 +1,4 @@
+import { isObject } from '@adobe/spacecat-shared-utils';
 import React, { useEffect, useMemo } from 'react';
 import {
   CartesianGrid,
@@ -12,8 +13,6 @@ import {
 } from 'recharts';
 
 import { hasAudits } from '../../utils/siteUtils';
-import { formatPercent, formatSeconds } from '../../utils/utils';
-import { isObject } from '@adobe/spacecat-shared-utils';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {

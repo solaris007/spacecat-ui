@@ -1,19 +1,26 @@
-import React, { useEffect, useState } from 'react';
 import {
+  ActionButton,
   Cell,
-  Column, Flex,
+  Column,
+  Flex,
   Row,
   TableBody,
   TableHeader,
   TableView,
   Text,
+  View,
 } from '@adobe/react-spectrum';
-import SiteRowActions from './actions/SiteRowActions';
 import { isObject } from '@adobe/spacecat-shared-utils';
+import Report from '@spectrum-icons/workflow/Report';
+import React, { useEffect, useState } from 'react';
+
+import SiteRowActions from './actions/SiteRowActions';
+
 import PercentChangeBadge from '../content/PercentChangeBadge';
 import { formatPercent, formatSeconds, formatSigned, renderExternalLink } from '../../utils/utils';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 
-function calculatePSIMetric (site, metric) {
+function calculatePSIMetric(site, metric) {
   const current = site.audits[0].auditResult.scores;
   const previous = site.audits[0].previousAuditResult.scores;
   return {
@@ -26,7 +33,10 @@ function calculatePSIMetric (site, metric) {
 
 function calculateLeaderboardScores(sites, showWinners) {
   // Calculate Min and Max TBT for normalization
-  const tbtValues = sites.map(site => site.audits[0].auditResult.totalBlockingTime || 0);
+  const tbtValues = sites.flatMap(site => [
+    site.audits[0].auditResult.totalBlockingTime || 0,
+    site.audits[0].previousAuditResult.totalBlockingTime || 0
+  ]);
   const minTBT = Math.min(...tbtValues);
   const maxTBT = Math.max(...tbtValues);
 
@@ -69,7 +79,7 @@ function calculateLeaderboardScores(sites, showWinners) {
 
   return sites
     .filter(site => isObject(site.audits[0].auditResult?.scores) && isObject(site.audits[0].previousAuditResult?.scores))
-    .map((site, index) => ({
+    .map((site) => ({
       ...site,
       metrics: calculateMetrics(site)
     }))
@@ -90,61 +100,103 @@ function renderMetricsCell({ site, metric }) {
   )
 }
 
+function transformChartData(sites) {
+  return sites.map(site => ({
+    siteName: site.baseURL,
+    performance: site.metrics.performance.delta,
+    seo: site.metrics.seo.delta,
+    accessibility: site.metrics.accessibility.delta,
+    bestPractices: site.metrics['best-practices'].delta,
+    totalBlockingTime: site.metrics.totalBlockingTime.normalizedScore
+  }));
+}
+
 function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     const data = calculateLeaderboardScores(sites, showWinners);
+
     setLeaderboardData(data);
+    setChartData(transformChartData(data));
   }, [sites, showWinners]);
 
   return (
-    <TableView aria-label={showWinners ? "Winners" : "Losers"} height="size-3600">
-      <TableHeader>
-        <Column key="site" width="1.3fr">Site</Column>
-        <Column key="delta-performance" width="1fr">Perf</Column>
-        <Column key="delta-tbt" width="1fr">TBT</Column>
-        <Column key="delta-seo" width="1fr">SEO</Column>
-        <Column key="delta-accessibility" width="1fr">A11Y</Column>
-        <Column key="delta-best-practices" width="1fr">BP</Column>
-        <Column key="actions" width="0.2fr">&nbsp;</Column>
-      </TableHeader>
-      <TableBody>
-        {leaderboardData.map((site, index) => (
-          <Row key={index}>
-            <Cell>
-              <Flex direction="row" alignItems="center" alignContent="center" gap="size-150">
-                <Text>{index + 1}. ({site.metrics.totalScore.toFixed(2)})</Text>
-                <Text>{renderExternalLink(site.baseURL)}</Text>
-              </Flex>
-            </Cell>
-            {renderMetricsCell({ site, metric: 'performance' })}
-            <Cell>
-              <Flex direction="row" alignItems="center" gap="size-150">
-                <PercentChangeBadge
-                  percentage={site.metrics.totalBlockingTime.percentChange}
-                  reverse={true}
-                  label="totalBlockingTime"
+    <View>
+      <TableView aria-label={showWinners ? "Winners" : "Losers"} height="size-3600">
+        <TableHeader>
+          <Column key="site" width="1.3fr">
+            <Flex direction="row" alignItems="center" gap="size-150">
+              <Text>Site</Text>
+              <ActionButton onPress={() => alert(234)} aria-label="Debug Chart">
+                <Report size="XS"/>
+              </ActionButton>
+            </Flex>
+          </Column>
+          <Column key="delta-performance" width="1fr">Perf</Column>
+          <Column key="delta-tbt" width="1fr">TBT</Column>
+          <Column key="delta-seo" width="1fr">SEO</Column>
+          <Column key="delta-accessibility" width="1fr">A11Y</Column>
+          <Column key="delta-best-practices" width="1fr">BP</Column>
+          <Column key="actions" width="0.2fr">&nbsp;</Column>
+        </TableHeader>
+        <TableBody>
+          {leaderboardData.map((site, index) => (
+            <Row key={index}>
+              <Cell>
+                <Flex direction="row" alignItems="center" alignContent="center" gap="size-150">
+                  <Text>{index + 1}. ({site.metrics.totalScore.toFixed(2)})</Text>
+                  <Text>{renderExternalLink(site.baseURL)}</Text>
+                </Flex>
+              </Cell>
+              {renderMetricsCell({ site, metric: 'performance' })}
+              <Cell>
+                <Flex direction="row" alignItems="center" gap="size-150">
+                  <PercentChangeBadge
+                    percentage={site.metrics.totalBlockingTime.percentChange}
+                    reverse={true}
+                    label="totalBlockingTime"
+                  />
+                  <Text>{formatSeconds(site.metrics.totalBlockingTime.previous)} -> {formatSeconds(site.metrics.totalBlockingTime.current)}</Text>
+                  <Text>({formatSigned(site.metrics.totalBlockingTime.delta / 1000, 2)})</Text>
+                </Flex>
+              </Cell>
+              {renderMetricsCell({ site, metric: 'seo' })}
+              {renderMetricsCell({ site, metric: 'accessibility' })}
+              {renderMetricsCell({ site, metric: 'best-practices' })}
+              <Cell>
+                <SiteRowActions
+                  site={site}
+                  auditType={auditType}
+                  audit={site.audits[0]}
+                  updateSites={updateSites}
                 />
-                <Text>{formatSeconds(site.metrics.totalBlockingTime.previous)} -> {formatSeconds(site.metrics.totalBlockingTime.current)}</Text>
-                <Text>({formatSigned(site.metrics.totalBlockingTime.delta/1000, 2)})</Text>
-              </Flex>
-            </Cell>
-            {renderMetricsCell({ site, metric: 'seo' })}
-            {renderMetricsCell({ site, metric: 'accessibility' })}
-            {renderMetricsCell({ site, metric: 'best-practices' })}
-            <Cell>
-              <SiteRowActions
-                site={site}
-                auditType={auditType}
-                audit={site.audits[0]}
-                updateSites={updateSites}
-              />
-            </Cell>
-          </Row>
-        ))}
-      </TableBody>
-    </TableView>
+              </Cell>
+            </Row>
+          ))}
+        </TableBody>
+      </TableView>
+      <BarChart
+        width={1024}
+        height={300}
+        data={chartData}
+        margin={{
+          top: 20, right: 30, left: 20, bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3"/>
+        <XAxis dataKey="siteName"/>
+        <YAxis/>
+        <Tooltip contentStyle={{ backgroundColor: '#292929', color: 'white' }}/>
+        <Legend/>
+        <Bar dataKey="performance" stackId="a" fill="#8884d8"/>
+        <Bar dataKey="seo" stackId="a" fill="#82ca9d"/>
+        <Bar dataKey="accessibility" stackId="a" fill="#ffc658"/>
+        <Bar dataKey="bestPractices" stackId="a" fill="#ff8042"/>
+        <Bar dataKey="totalBlockingTime" stackId="a" fill="#413ea0"/>
+      </BarChart>
+    </View>
   );
 }
 

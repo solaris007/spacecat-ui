@@ -57,7 +57,7 @@ function calculateLeaderboardScores(sites, showWinners) {
       previous: previousTotalBlockingTime,
     };
 
-    const weights = { performance: 1.4, totalBlockingTime: 1.2, seo: 1.1, accessibility: 1, 'best-practices': 1 };
+    const weights = { performance: 1.4, totalBlockingTime: 0.6, seo: 1.1, accessibility: 1, 'best-practices': 1 };
 
     metrics.totalScore = Object.keys(metrics).reduce((total, key) => {
       const score = key === 'totalBlockingTime' ? metrics[key].normalizedScore * weights[key] : metrics[key].delta * weights[key];

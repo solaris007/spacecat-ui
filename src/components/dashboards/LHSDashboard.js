@@ -25,6 +25,7 @@ import SitesScoresTable from '../tables/SitesScoresTable';
 import LiveStatusPicker from '../pickers/LiveStatusPicker';
 import Refresh from '@spectrum-icons/workflow/Refresh';
 import SitesPSILeaderboard from '../tables/SitesPSILeaderboard';
+import PerformanceTBTScatterPlot from '../charts/PerformanceTBTScatterPlot';
 
 const STRATEGIES = {
   LHS_DESKTOP: 'lhs-desktop',
@@ -150,7 +151,12 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
             chart={PerformanceScatterPlot}
             chartProps={{ sites }}
           />
-          <AggregatedBarChartPSIScores sites={scoredSites}/>
+          <FullscreenChart
+            title="Performance/TBT Plot"
+            chart={PerformanceTBTScatterPlot}
+            chartProps={{ sites: scoredSites }}
+          />
+          {/*<AggregatedBarChartPSIScores sites={scoredSites}/>*/}
         </Flex>
       </View>
       <View gridArea="table-scores">

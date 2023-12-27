@@ -92,7 +92,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         base: [
           'controls',
           'charts',
-          'table-winners',
+          'table-leaderboard',
           'table-scores',
           'table-errors',
           'table-disabled',
@@ -100,7 +100,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         M: [
           'controls controls',
           'charts charts',
-          'table-winners table-winners',
+          'table-leaderboard table-leaderboard',
           'table-scores table-errors',
           'table-disabled table-disabled'
         ],
@@ -146,8 +146,8 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         <h2>Scores ({scoredSites.length})</h2>
         <SitesScoresTable sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
-      <View gridArea="table-winners">
-        <h2>Winners ({scoredSites.length})</h2>
+      <View gridArea="table-leaderboard">
+        <h2>Leaderboard ({scoredSites.length})</h2>
         <SitesPSILeaderboard showWinners={true} sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-errors">

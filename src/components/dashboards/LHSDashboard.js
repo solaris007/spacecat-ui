@@ -1,4 +1,15 @@
-import { ActionButton, Flex, Grid, Item, Picker, Tooltip, TooltipTrigger, View } from '@adobe/react-spectrum';
+import {
+  ActionButton, Content,
+  ContextualHelp,
+  Flex,
+  Grid,
+  Heading,
+  Item,
+  Picker, Text,
+  Tooltip,
+  TooltipTrigger,
+  View
+} from '@adobe/react-spectrum';
 import { ToastQueue } from '@react-spectrum/toast';
 import React, { useEffect, useState } from 'react';
 
@@ -72,7 +83,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
 
   const updateSitesState = (updatedSite) => {
     setSites(prevSites => {
-      const newSites = {...prevSites};
+      const newSites = { ...prevSites };
       for (const strategy in newSites) {
         newSites[strategy] = newSites[strategy].map(site =>
           site.id === updatedSite.id ? { ...site, ...updatedSite } : site
@@ -138,7 +149,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
             title="Performance Scatter Plot"
             chart={PerformanceScatterPlot}
             chartProps={{ sites }}
-            />
+          />
           <AggregatedBarChartPSIScores sites={scoredSites}/>
         </Flex>
       </View>
@@ -147,8 +158,30 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         <SitesScoresTable sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
       </View>
       <View gridArea="table-leaderboard">
-        <h2>Leaderboard ({scoredSites.length})</h2>
-        <SitesPSILeaderboard showWinners={true} sites={scoredSites} auditType={strategy} updateSites={updateSitesState}/>
+        <Flex direction="row" gap="size-150" alignItems="center">
+          <Heading level={3}>Leaderboard ({scoredSites.length})</Heading>
+          <ContextualHelp variant="info">
+            <Heading>Leaderboard Help</Heading>
+            <Content>
+              <Text>
+                The leaderboard provides a ranking of websites based on their overall performance,
+                derived from the latest and previous PSI audits. It specifically focuses on metrics
+                like Performance, Total Blocking Time (TBT), SEO, Accessibility (A11Y), and Best Practices (BP).
+                One aspect is the normalization of TBT, ensuring a fair comparison across all sites regardless
+                of their individual performance ranges. This normalization process adjusts TBT scores to a
+                standard scale, making it easier to compare changes over time.
+                The table then calculates an overall score for each site, reflecting improvements or declines
+                in these key areas.
+              </Text>
+            </Content>
+          </ContextualHelp>
+        </Flex>
+          <SitesPSILeaderboard
+            showWinners={true}
+            sites={scoredSites}
+            auditType={strategy}
+            updateSites={updateSitesState}
+          />
       </View>
       <View gridArea="table-errors">
         <h2>Errors ({errorSites.length})</h2>

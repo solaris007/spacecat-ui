@@ -58,6 +58,7 @@ export function isAuditDisabled(site, strategy) {
 
 export function createActionHandler({
                                       site,
+                                      audit,
                                       audits,
                                       auditType,
                                       navigate,
@@ -88,9 +89,19 @@ export function createActionHandler({
         );
         break;
       case 'psi-diff':
-        const sortedAudits = audits.sort((a, b) => new Date(a.auditedAt) - new Date(b.auditedAt));
+        let aUrl;
+        let bUrl;
+        if (!audits) {
+          aUrl = audit.previousAuditResult.fullAuditRef;
+          bUrl = audit.fullAuditRef;
+        } else {
+          const sortedAudits = audits.sort((a, b) => new Date(a.auditedAt) - new Date(b.auditedAt));
+          aUrl = sortedAudits[0].fullAuditRef;
+          bUrl = sortedAudits[1].fullAuditRef;
+        }
+
         window.open(
-          createPSIDiffURL(sortedAudits[0].fullAuditRef, sortedAudits[1].fullAuditRef),
+          createPSIDiffURL(aUrl, bUrl),
           '_blank',
         );
         break;

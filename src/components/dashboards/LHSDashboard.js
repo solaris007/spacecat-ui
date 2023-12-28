@@ -26,6 +26,7 @@ import LiveStatusPicker from '../pickers/LiveStatusPicker';
 import Refresh from '@spectrum-icons/workflow/Refresh';
 import SitesPSILeaderboard from '../tables/SitesPSILeaderboard';
 import PerformanceTBTScatterPlot from '../charts/PerformanceTBTScatterPlot';
+import DeltaPSIChart from '../charts/DeltaPSIChart';
 
 const STRATEGIES = {
   LHS_DESKTOP: 'lhs-desktop',
@@ -103,7 +104,8 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
       areas={{
         base: [
           'controls',
-          'charts',
+          'charts-1',
+          'charts-2',
           'table-leaderboard',
           'table-scores',
           'table-errors',
@@ -111,7 +113,8 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
         ],
         M: [
           'controls controls',
-          'charts charts',
+          'charts-1 charts-1',
+          'charts-2 charts-2',
           'table-leaderboard table-leaderboard',
           'table-scores table-errors',
           'table-disabled table-disabled'
@@ -144,7 +147,7 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
           <LiveStatusPicker onSelectionChange={setLiveStatus}/>
         </Flex>
       </View>
-      <View gridArea="charts">
+      <View gridArea="charts-1">
         <Flex direction="row" justifyContent="start" alignItems="center" gap="size-300">
           <FullscreenChart
             title="Performance Scatter Plot"
@@ -156,7 +159,16 @@ function LHSDashboard({ onLoadingComplete, onLoadingText, onDashboardTitle }) {
             chart={PerformanceTBTScatterPlot}
             chartProps={{ sites: scoredSites }}
           />
-          {/*<AggregatedBarChartPSIScores sites={scoredSites}/>*/}
+        </Flex>
+      </View>
+      <View gridArea="charts-2">
+        <Flex direction="row" justifyContent="start" alignItems="center" gap="size-300">
+          <FullscreenChart
+            title="Performance Delta"
+            chart={DeltaPSIChart}
+            chartProps={{ sites: scoredSites }}
+          />
+          <AggregatedBarChartPSIScores sites={scoredSites}/>
         </Flex>
       </View>
       <View gridArea="table-scores">

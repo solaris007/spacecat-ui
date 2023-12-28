@@ -209,20 +209,8 @@ function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
 
   useEffect(() => {
     const data = calculateLeaderboardScores(sites, showWinners);
-
     setLeaderboardData(data);
     setChartData(transformChartData(data));
-
-    const columns = ['TOTAL', 'Perf        ', 'TBT             ', 'SEO         ', 'A11Y        ', 'BP          ', 'URL'];
-    const keys = ['performance', 'totalBlockingTime', 'seo', 'accessibility', 'best-practices'];
-
-    console.log(columns.join('\t'))
-    data.map(site => console.log(
-      site.metrics.totalScore.toFixed(3) + '\t'
-      + keys.map(key => `${site.metrics[key].delta.toFixed(3)} [${site.metrics[key].score.toFixed(3)}]`).join('\t')
-      + '\t' + site.baseURL
-    ));
-
   }, [sites, showWinners]);
 
   return (

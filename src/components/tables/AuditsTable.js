@@ -11,7 +11,6 @@ import {
   Text,
 } from '@adobe/react-spectrum';
 import Compare from '@spectrum-icons/workflow/Compare';
-import Globe from '@spectrum-icons/workflow/Globe';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +20,7 @@ import { createActionBarItems, formatDate, renderExternalLink } from '../../util
 import AuditLHSScoreStatus from '../content/AuditLHSScoreStatus';
 import LiveStatus from '../content/LiveStatus';
 import ErrorStatus from '../content/ErrorStatus';
+
 import AuditsRowActions from './actions/AuditsRowActions';
 
 const actionBarItemConfig = [

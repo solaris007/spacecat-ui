@@ -8,11 +8,12 @@ import {
 } from '@adobe/react-spectrum';
 import React, { useMemo, useState } from 'react';
 
-import { formatSeconds, renderExternalLink } from '../../utils/utils';
+import { renderExternalLink } from '../../utils/utils';
 
-import SiteRowActions from './actions/SiteRowActions';
 import AuditLHSScoreBadge from '../content/AuditLHSScoreBadge';
 import AuditLHSTotalBlockingTimeBadge from '../content/AuditLHSTotalBlockingTimeBadge';
+
+import SiteRowActions from './actions/SiteRowActions';
 
 function SitesScoresTable({ sites, auditType, updateSites }) {
   const [sortDescriptor, setSortDescriptor] = useState({ column: 'performance', direction: 'ascending' });

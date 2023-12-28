@@ -1,10 +1,10 @@
 import React from 'react';
 import { Flex, Text } from '@adobe/react-spectrum';
 
-import { formatLighthouseError, formatSeconds } from '../../utils/utils';
+import { formatLighthouseError } from '../../utils/utils';
 
 import AuditLHSScoreBadge from './AuditLHSScoreBadge';
-import AuditLHSTotalBlockingTimeBadge from './AuditLHSTotalBlockingTimeBadge';
+
 
 const scoreNames = [
   { key: 'performance', label: 'Perf' },

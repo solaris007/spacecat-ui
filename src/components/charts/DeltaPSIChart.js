@@ -1,4 +1,4 @@
-import { hasText } from '@adobe/spacecat-shared-utils';
+import { hasText, isObject } from '@adobe/spacecat-shared-utils';
 import React, { useEffect, useState } from 'react';
 import {
   CartesianGrid,
@@ -50,6 +50,7 @@ function DeltaPSIChart({
       const key = hasText(pickerSelection) ? pickerSelection : 'performance';
 
       const calculateValues = (site, index) => {
+
         let current = site.audits[0].auditResult?.scores[key];
         let previous = site.audits[0].previousAuditResult?.scores[key];
 
@@ -69,7 +70,10 @@ function DeltaPSIChart({
         }
       }
 
-      return sites.filter(hasAudits).map(calculateValues);
+      return sites
+        .filter(hasAudits)
+        .filter((site) => !site.audits[0].isError && isObject(site.audits[0].previousAuditResult?.scores))
+        .map(calculateValues);
     };
 
     setChartData(processData(sites));
@@ -85,7 +89,10 @@ function DeltaPSIChart({
         <XAxis dataKey="index"/>
         <YAxis yAxisId="left" domain={[0, 1]} tickFormatter={(value) => value.toFixed(2)}/>
         <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} tickFormatter={(value) => value.toFixed(2)}/>
-        <Tooltip formatter={(value, name) => [
+        <Tooltip
+          contentStyle={{ backgroundColor: '#292929', color: 'white' }}
+          labelFormatter={(value, payload) => payload[0]?.payload?.baseURL}
+          formatter={(value, name) => [
           pickerSelection === 'totalBlockingTime' ? `${value.toFixed(2)}s` : formatPercent(value),
           name
         ]}/>

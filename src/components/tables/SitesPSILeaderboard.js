@@ -20,15 +20,48 @@ import PercentChangeBadge from '../content/PercentChangeBadge';
 import { formatPercent, formatSeconds, formatSigned, renderExternalLink } from '../../utils/utils';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 
+const SCORE_WEIGHTS = { performance: 1.4, totalBlockingTime: 0.6, seo: 1.1, accessibility: 1, 'best-practices': 1 };
+
 function calculatePSIMetric(site, metric) {
   const current = site.audits[0].auditResult.scores;
   const previous = site.audits[0].previousAuditResult.scores;
+  const delta = current[metric] - previous[metric];
   return {
     current: current[metric],
-    delta: current[metric] - previous[metric],
-    percentChange: ((current[metric] - previous[metric]) / previous[metric]) * 100,
+    delta,
+    percentChange: (delta / previous[metric]) * 100,
     previous: previous[metric],
+    score: delta * SCORE_WEIGHTS[metric],
   }
+}
+
+function calculateTBTMetric(site, minTBT, maxTBT) {
+  const currentTotalBlockingTime = site.audits[0].auditResult.totalBlockingTime || 0;
+  const previousTotalBlockingTime = site.audits[0].previousAuditResult.totalBlockingTime || 0;
+  const deltaTotalBlockingTime = currentTotalBlockingTime - previousTotalBlockingTime;
+  let normalizedTBT;
+
+  if (maxTBT !== minTBT) {
+    if (deltaTotalBlockingTime < 0) { // Improvement in TBT
+      normalizedTBT = 1 - ((currentTotalBlockingTime - minTBT) / (maxTBT - minTBT));
+    } else if (deltaTotalBlockingTime === 0) { // No Change
+      normalizedTBT = 0.5; // Assign a neutral value
+    } else { // Deterioration
+      normalizedTBT = ((currentTotalBlockingTime - minTBT) / (maxTBT - minTBT));
+    }
+    normalizedTBT = Math.max(0, Math.min(normalizedTBT, 1)); // Clamp between 0 and 1
+  } else {
+    normalizedTBT = currentTotalBlockingTime === minTBT ? 1 : 0; // Handle the case where all TBTs are the same
+  }
+
+  return {
+    current: currentTotalBlockingTime,
+    normalizedScore: normalizedTBT,
+    delta: deltaTotalBlockingTime,
+    percentChange: ((deltaTotalBlockingTime / previousTotalBlockingTime) * 100) || 0,
+    previous: previousTotalBlockingTime,
+    score: normalizedTBT * SCORE_WEIGHTS.totalBlockingTime,
+  };
 }
 
 function calculateLeaderboardScores(sites, showWinners) {
@@ -43,36 +76,12 @@ function calculateLeaderboardScores(sites, showWinners) {
   const calculateMetrics = (site) => {
     const metrics = ['performance', 'seo', 'accessibility', 'best-practices'].reduce((metrics, metric) => {
       metrics[metric] = calculatePSIMetric(site, metric);
+      metrics.totalScore = (metrics.totalScore || 0) + metrics[metric].score;
       return metrics;
     }, {});
 
-    const currentTotalBlockingTime = site.audits[0].auditResult.totalBlockingTime || 0;
-    const previousTotalBlockingTime = site.audits[0].previousAuditResult.totalBlockingTime || 0;
-    let normalizedTBT;
-
-    // Check if Max TBT is not equal to Min TBT to avoid division by zero
-    if (maxTBT !== minTBT) {
-      normalizedTBT = (currentTotalBlockingTime - minTBT) / (maxTBT - minTBT);
-      normalizedTBT = 1 - normalizedTBT; // Invert the normalization
-      normalizedTBT = Math.max(0, Math.min(normalizedTBT, 1)); // Clamp between 0 and 1
-    } else {
-      normalizedTBT = currentTotalBlockingTime === minTBT ? 1 : 0; // Handle the case where all TBTs are the same
-    }
-
-    metrics.totalBlockingTime = {
-      current: currentTotalBlockingTime,
-      normalizedScore: normalizedTBT,
-      delta: currentTotalBlockingTime - previousTotalBlockingTime,
-      percentChange: (((currentTotalBlockingTime - previousTotalBlockingTime) / previousTotalBlockingTime) * 100) || 0,
-      previous: previousTotalBlockingTime,
-    };
-
-    const weights = { performance: 1.4, totalBlockingTime: 0.6, seo: 1.1, accessibility: 1, 'best-practices': 1 };
-
-    metrics.totalScore = Object.keys(metrics).reduce((total, key) => {
-      const score = key === 'totalBlockingTime' ? metrics[key].normalizedScore * weights[key] : metrics[key].delta * weights[key];
-      return total + score;
-    }, 0);
+    metrics.totalBlockingTime = calculateTBTMetric(site, minTBT, maxTBT);
+    metrics.totalScore += metrics.totalBlockingTime.score;
 
     return metrics;
   };
@@ -120,6 +129,17 @@ function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
 
     setLeaderboardData(data);
     setChartData(transformChartData(data));
+
+    const columns = ['TOTAL', 'Perf        ', 'TBT             ', 'SEO         ', 'A11Y        ', 'BP          ', 'URL'];
+    const keys = ['performance', 'totalBlockingTime', 'seo', 'accessibility', 'best-practices'];
+
+    console.log(columns.join('\t'))
+    data.map(site => console.log(
+      site.metrics.totalScore.toFixed(3) + '\t'
+      + keys.map(key => `${site.metrics[key].delta.toFixed(3)} [${site.metrics[key].score.toFixed(3)}]`).join('\t')
+      + '\t' + site.baseURL
+    ));
+
   }, [sites, showWinners]);
 
   return (
@@ -194,7 +214,7 @@ function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
         <Bar dataKey="seo" stackId="a" fill="#82ca9d"/>
         <Bar dataKey="accessibility" stackId="a" fill="#ffc658"/>
         <Bar dataKey="bestPractices" stackId="a" fill="#ff8042"/>
-        <Bar dataKey="totalBlockingTime" stackId="a" fill="#413ea0"/>
+        <Bar dataKey="totalBlockingTime" stackId="a" fill="#aaa"/>
       </BarChart>
     </View>
   );

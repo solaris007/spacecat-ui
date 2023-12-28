@@ -52,7 +52,7 @@ const Welcome = () => {
       {isLoading && (
         <Flex direction="column" alignItems="center" justifyContent="center" gap="size-200">
           <Heading level={1}>{loadingText}</Heading>
-          <Image src="/spacecat_logo_512.webp" alt="SpaceCat Logo" UNSAFE_className="flipping"/>
+          <Image src={`${process.env.PUBLIC_URL}/spacecat_logo_512.webp`} alt="SpaceCat Logo" UNSAFE_className="flipping"/>
         </Flex>
       )}
     </Flex>

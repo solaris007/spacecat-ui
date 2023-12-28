@@ -20,7 +20,7 @@ const NavigationBar = () => {
       <Flex direction="row" justifyContent="space-between" alignItems="center" padding="size-200">
         <Flex gap="size-200" alignItems="center">
           <Link href="/">
-            <Image src="/spacecat_logo_50.webp" alt="SpaceCat Logo" width="50px"/>
+            <Image src={`${process.env.PUBLIC_URL}/spacecat_logo_50.webp`} alt="SpaceCat Logo" width="50px"/>
           </Link>
           <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName('/')} href="/">Dashboard</Link>

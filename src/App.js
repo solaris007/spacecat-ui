@@ -3,8 +3,8 @@ import AppWithRouter from './AppWithRouter';
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <AppWithRouter />
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
+      <AppWithRouter/>
     </BrowserRouter>
   );
 };

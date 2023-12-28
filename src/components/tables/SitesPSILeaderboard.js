@@ -10,17 +10,26 @@ import {
   Text,
   View,
 } from '@adobe/react-spectrum';
+import {
+  Bar,
+  BarChart, Brush,
+  CartesianGrid,
+  Legend, ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 import { isObject } from '@adobe/spacecat-shared-utils';
-import Report from '@spectrum-icons/workflow/Report';
+import Algorithm from '@spectrum-icons/workflow/Algorithm';
 import React, { useEffect, useState } from 'react';
 
-import SiteRowActions from './actions/SiteRowActions';
+import { formatPercent, formatSeconds, formatSigned, renderExternalLink } from '../../utils/utils';
 
 import PercentChangeBadge from '../content/PercentChangeBadge';
-import { formatPercent, formatSeconds, formatSigned, renderExternalLink } from '../../utils/utils';
-import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
+import SiteRowActions from './actions/SiteRowActions';
 
-const SCORE_WEIGHTS = { performance: 1.4, totalBlockingTime: 0.6, seo: 1.1, accessibility: 1, 'best-practices': 1 };
+const SCORE_WEIGHTS = { performance: 1.4, totalBlockingTime: 1, seo: 1.1, accessibility: 1, 'best-practices': 1 };
 
 function calculatePSIMetric(site, metric) {
   const current = site.audits[0].auditResult.scores;
@@ -34,44 +43,47 @@ function calculatePSIMetric(site, metric) {
     score: delta * SCORE_WEIGHTS[metric],
   }
 }
-
-function calculateTBTMetric(site, minTBT, maxTBT) {
-  const currentTotalBlockingTime = site.audits[0].auditResult.totalBlockingTime || 0;
-  const previousTotalBlockingTime = site.audits[0].previousAuditResult.totalBlockingTime || 0;
-  const deltaTotalBlockingTime = currentTotalBlockingTime - previousTotalBlockingTime;
-  let normalizedTBT;
-
-  if (maxTBT !== minTBT) {
-    if (deltaTotalBlockingTime < 0) { // Improvement in TBT
-      normalizedTBT = 1 - ((currentTotalBlockingTime - minTBT) / (maxTBT - minTBT));
-    } else if (deltaTotalBlockingTime === 0) { // No Change
-      normalizedTBT = 0.5; // Assign a neutral value
-    } else { // Deterioration
-      normalizedTBT = ((currentTotalBlockingTime - minTBT) / (maxTBT - minTBT));
-    }
-    normalizedTBT = Math.max(0, Math.min(normalizedTBT, 1)); // Clamp between 0 and 1
-  } else {
-    normalizedTBT = currentTotalBlockingTime === minTBT ? 1 : 0; // Handle the case where all TBTs are the same
+function normalizeDeltaTBT(deltaTBT, minDeltaTBT, maxDeltaTBT) {
+  const maxAbsDelta = Math.max(Math.abs(minDeltaTBT), Math.abs(maxDeltaTBT));
+  if (maxAbsDelta === 0) {
+    return 0; // Avoid division by zero if there's no variation in delta TBT
   }
+  return deltaTBT / maxAbsDelta;
+}
 
+function calculateTBTMetric(site, minDeltaTBT, maxDeltaTBT) {
+  const currentTBT = site.audits[0].auditResult.totalBlockingTime || 0;
+  const previousTBT = site.audits[0].previousAuditResult.totalBlockingTime || 0;
+  const deltaTBT = currentTBT - previousTBT;
+
+  let normalizedDeltaTBT = normalizeDeltaTBT(deltaTBT, minDeltaTBT, maxDeltaTBT);
+
+  // Logarithmic Score Calculation
+  let score;
+  if (normalizedDeltaTBT === 0) {
+    score = 0;
+  } else {
+    score = -Math.sign(normalizedDeltaTBT) * Math.pow(Math.abs(normalizedDeltaTBT), 2);
+  }
   return {
-    current: currentTotalBlockingTime,
-    normalizedScore: normalizedTBT,
-    delta: deltaTotalBlockingTime,
-    percentChange: ((deltaTotalBlockingTime / previousTotalBlockingTime) * 100) || 0,
-    previous: previousTotalBlockingTime,
-    score: normalizedTBT * SCORE_WEIGHTS.totalBlockingTime,
+    current: currentTBT,
+    deltaNormalized: normalizedDeltaTBT,
+    delta: deltaTBT,
+    percentChange: ((deltaTBT / previousTBT) * 100) || 0,
+    previous: previousTBT,
+    score: score * SCORE_WEIGHTS.totalBlockingTime,
   };
 }
 
 function calculateLeaderboardScores(sites, showWinners) {
-  // Calculate Min and Max TBT for normalization
-  const tbtValues = sites.flatMap(site => [
-    site.audits[0].auditResult.totalBlockingTime || 0,
-    site.audits[0].previousAuditResult.totalBlockingTime || 0
-  ]);
-  const minTBT = Math.min(...tbtValues);
-  const maxTBT = Math.max(...tbtValues);
+  const deltaTBTValues = sites.map(site => {
+    const currentTBT = site.audits[0].auditResult.totalBlockingTime || 0;
+    const previousTBT = site.audits[0].previousAuditResult.totalBlockingTime || 0;
+    return currentTBT - previousTBT;
+  });
+
+  const minDeltaTBT = Math.min(...deltaTBTValues);
+  const maxDeltaTBT = Math.max(...deltaTBTValues);
 
   const calculateMetrics = (site) => {
     const metrics = ['performance', 'seo', 'accessibility', 'best-practices'].reduce((metrics, metric) => {
@@ -80,7 +92,7 @@ function calculateLeaderboardScores(sites, showWinners) {
       return metrics;
     }, {});
 
-    metrics.totalBlockingTime = calculateTBTMetric(site, minTBT, maxTBT);
+    metrics.totalBlockingTime = calculateTBTMetric(site, minDeltaTBT, maxDeltaTBT);
     metrics.totalScore += metrics.totalBlockingTime.score;
 
     return metrics;
@@ -110,19 +122,26 @@ function renderMetricsCell({ site, metric }) {
 }
 
 function transformChartData(sites) {
-  return sites.map(site => ({
+  return sites.map((site, index) => ({
     siteName: site.baseURL,
-    performance: site.metrics.performance.delta,
-    seo: site.metrics.seo.delta,
-    accessibility: site.metrics.accessibility.delta,
-    bestPractices: site.metrics['best-practices'].delta,
-    totalBlockingTime: site.metrics.totalBlockingTime.normalizedScore
+    rank: index,
+    performance: site.metrics.performance.score,
+    seo: site.metrics.seo.score,
+    accessibility: site.metrics.accessibility.score,
+    bestPractices: site.metrics['best-practices'].score,
+    totalBlockingTime: site.metrics.totalBlockingTime.score,
+    totalScore: site.metrics.totalScore,
   }));
 }
 
 function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [showScoreChart, setShowScoreChart] = useState(false);
+
+  function handleShowScoreChart() {
+    setShowScoreChart(!showScoreChart);
+  }
 
   useEffect(() => {
     const data = calculateLeaderboardScores(sites, showWinners);
@@ -149,8 +168,8 @@ function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
           <Column key="site" width="1.3fr">
             <Flex direction="row" alignItems="center" gap="size-150">
               <Text>Site</Text>
-              <ActionButton onPress={() => alert(234)} aria-label="Debug Chart">
-                <Report size="XS"/>
+              <ActionButton onPress={handleShowScoreChart} aria-label="Debug Chart">
+                <Algorithm size="XS"/>
               </ActionButton>
             </Flex>
           </Column>
@@ -197,25 +216,36 @@ function SitesPSILeaderboard({ sites, showWinners, auditType, updateSites }) {
           ))}
         </TableBody>
       </TableView>
-      <BarChart
-        width={1024}
-        height={300}
-        data={chartData}
-        margin={{
-          top: 20, right: 30, left: 20, bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3"/>
-        <XAxis dataKey="siteName"/>
-        <YAxis/>
-        <Tooltip contentStyle={{ backgroundColor: '#292929', color: 'white' }}/>
-        <Legend/>
-        <Bar dataKey="performance" stackId="a" fill="#8884d8"/>
-        <Bar dataKey="seo" stackId="a" fill="#82ca9d"/>
-        <Bar dataKey="accessibility" stackId="a" fill="#ffc658"/>
-        <Bar dataKey="bestPractices" stackId="a" fill="#ff8042"/>
-        <Bar dataKey="totalBlockingTime" stackId="a" fill="#aaa"/>
-      </BarChart>
+      {showScoreChart &&
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={chartData}
+            stackOffset="sign"
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3"/>
+            <XAxis dataKey="rank"/>
+            <YAxis domain={[-1, 1]}/>
+            <Tooltip
+              contentStyle={{ backgroundColor: '#292929', color: 'white' }}
+              formatter={(value, name) => {
+                return [value.toFixed(3), name]
+              }}
+              labelFormatter={(value, payload) => {
+                return `Score: ${payload[0]?.payload?.totalScore.toFixed(3)} for ${payload[0]?.payload.siteName}`
+              }}
+            />
+            <Legend/>
+            <ReferenceLine y={0} stroke="#ff0000" />
+            <Brush dataKey="rank" height={30} stroke="#8884d8" />
+            <Bar dataKey="totalBlockingTime" stackId="a" fill="#ffdd99"/>
+            <Bar dataKey="performance" stackId="a" fill="#8884d8"/>
+            <Bar dataKey="seo" stackId="a" fill="#82ca9d"/>
+            <Bar dataKey="accessibility" stackId="a" fill="#ffc658"/>
+            <Bar dataKey="bestPractices" stackId="a" fill="#ff8042"/>
+          </BarChart>
+        </ResponsiveContainer>
+      }
     </View>
   );
 }

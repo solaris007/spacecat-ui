@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from './AuthContext';
+
 import { getLocalStorageItem, setLocalStorageItem } from '../utils/localStorageUtil';
+
+import AuthContext from './AuthContext';
 
 const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

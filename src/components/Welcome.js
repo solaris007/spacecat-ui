@@ -6,11 +6,15 @@ import {
   Item,
   Picker,
 } from '@adobe/react-spectrum';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+
+import AuthContext from '../auth/AuthContext';
 
 import SpacecatDashboard from './dashboards/SpacecatDashboard';
 
 const Welcome = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+
   const [isLoading, setIsLoading] = useState(true);
   const [auditType, setAuditType] = useState('lhs');
   const [loadingText, setLoadingText] = useState('Spacecat is loading...');
@@ -27,6 +31,10 @@ const Welcome = () => {
   const handleDashboardTitle = (text) => {
     setDashboardTitle(text);
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <Flex direction="column" justifyContent="center" gap="size-200">

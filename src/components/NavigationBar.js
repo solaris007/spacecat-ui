@@ -10,9 +10,10 @@ const NavigationBar = () => {
   const { environment } = useContext(AuthContext);
   const location = useLocation();
   const currentPath = location.pathname;
+  const basePath = process.env.PUBLIC_URL;
 
   const getLinkClassName = (path) => {
-    return currentPath === path || (path !== '/' && currentPath.startsWith(path)) ? 'active nav-link' : 'nav-link';
+    return currentPath === path || (path !== `${basePath}/` && currentPath.startsWith(path)) ? 'active nav-link' : 'nav-link';
   };
 
   return (
@@ -23,11 +24,11 @@ const NavigationBar = () => {
             <Image src={`${process.env.PUBLIC_URL}/spacecat_logo_50.webp`} alt="SpaceCat Logo" width="50px"/>
           </Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName('/')} href="/">Dashboard</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/`)} href="/">Dashboard</Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName('/sites')} href="/sites">Sites</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/sites`)} href="/sites">Sites</Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName('/audits')} href="/audits">Audits</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/audits`)} href="/audits">Audits</Link>
           <Divider size="S" orientation="vertical"/>
         </Flex>
         <View>

@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
+
+import AuthContext from '../../auth/AuthContext';
 
 const Audits = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div>
       <h1>Audits Collection</h1>
-      {/* Additional content */}
+      <p>Coming Soon ...</p>
     </div>
   );
 };

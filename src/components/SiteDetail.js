@@ -12,7 +12,7 @@ import {
 } from '@adobe/react-spectrum';
 import { ToastQueue } from '@react-spectrum/toast';
 import Edit from '@spectrum-icons/workflow/Edit';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   CartesianGrid,
@@ -33,9 +33,12 @@ import SiteFormDialog from './dialogs/SiteFormDialog';
 import FinalURLFrequencyChart from './charts/FinalURLFrequencyChart';
 import AuditsTable from './tables/AuditsTable';
 import ElementWithCopyAction from './content/ElementWithCopyAction';
+import AuthContext from '../auth/AuthContext';
 
 
 const SiteDetails = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+
   const { siteId } = useParams();
   const [auditType, setAuditType] = useState('lhs-mobile');
   const [audits, setAudits] = useState(null);
@@ -46,6 +49,9 @@ const SiteDetails = () => {
   const [timeRange, setTimeRange] = useState(7);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
     const fetchSiteData = async () => {
       try {
         const data = await getSite(siteId);
@@ -59,9 +65,12 @@ const SiteDetails = () => {
     };
 
     fetchSiteData();
-  }, [siteId]);
+  }, [siteId, isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
     const fetchAudits = async (type) => {
       setIsAuditsLoading(true);
       try {
@@ -78,7 +87,7 @@ const SiteDetails = () => {
     if (auditType) {
       fetchAudits(auditType);
     }
-  }, [auditType, siteId]);
+  }, [auditType, siteId, isAuthenticated]);
 
   const onEditSite = () => {
     setIsSiteEditDialogOpen(true);
@@ -178,6 +187,10 @@ const SiteDetails = () => {
         <ProgressCircle aria-label="Loading…" isIndeterminate/>
       </Flex>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

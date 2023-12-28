@@ -1,0 +1,35 @@
+{
+  "short_name": "SpaceCat Admin",
+  "name": "SpaceCat Sites & Audits Administration",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "spacecat_logo_50.png",
+      "type": "image/png",
+      "sizes": "50x49"
+    },
+    {
+      "src": "spacecat_logo_192.png",
+      "type": "image/png",
+      "sizes": "192x189"
+    },
+    {
+      "src": "spacecat_logo_512.png",
+      "type": "image/png",
+      "sizes": "512x505"
+    },
+    {
+      "src": "spacecat_logo_832.png",
+      "type": "image/png",
+      "sizes": "832x820"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#1d1d1d"
+}

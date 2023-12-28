@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { hasText } from '@adobe/spacecat-shared-utils';
+import React, { useEffect, useState } from 'react';
 import {
   CartesianGrid,
   Legend,
@@ -11,8 +12,8 @@ import {
 } from 'recharts';
 
 import { hasAudits } from '../../utils/siteUtils';
-import { formatPercent, formatSeconds } from '../../utils/utils';
-import { hasText } from '@adobe/spacecat-shared-utils';
+import { formatPercent } from '../../utils/utils';
+
 
 function DeltaPSIChart({
                          sites,
@@ -42,33 +43,35 @@ function DeltaPSIChart({
     setDefaultPickerOption('performance');
   }, [setContextualHelpText, setPickerOptions, setDefaultPickerOption]);
 
-  const processData = (sites) => {
-    const key = hasText(pickerSelection) ? pickerSelection : 'performance';
-
-    const calculateValues = (site, index) => {
-      let current = site.audits[0].auditResult?.scores[key];
-      let previous = site.audits[0].previousAuditResult?.scores[key];
-
-      if (key === 'totalBlockingTime') {
-        current = site.audits[0].auditResult?.totalBlockingTime / 1000;
-        previous = site.audits[0].previousAuditResult?.totalBlockingTime / 1000;
-      }
-
-      const delta = current - previous;
-
-      return {
-        baseURL: site.baseURL,
-        current,
-        delta,
-        index,
-        previous,
-      }
-    }
-
-    return sites.filter(hasAudits).map(calculateValues);
-  };
-
   useEffect(() => {
+
+
+    const processData = (sites) => {
+      const key = hasText(pickerSelection) ? pickerSelection : 'performance';
+
+      const calculateValues = (site, index) => {
+        let current = site.audits[0].auditResult?.scores[key];
+        let previous = site.audits[0].previousAuditResult?.scores[key];
+
+        if (key === 'totalBlockingTime') {
+          current = site.audits[0].auditResult?.totalBlockingTime / 1000;
+          previous = site.audits[0].previousAuditResult?.totalBlockingTime / 1000;
+        }
+
+        const delta = current - previous;
+
+        return {
+          baseURL: site.baseURL,
+          current,
+          delta,
+          index,
+          previous,
+        }
+      }
+
+      return sites.filter(hasAudits).map(calculateValues);
+    };
+
     setChartData(processData(sites));
   }, [sites, pickerSelection]);
 

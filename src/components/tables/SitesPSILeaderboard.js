@@ -31,6 +31,18 @@ import SiteRowActions from './actions/SiteRowActions';
 
 const SCORE_WEIGHTS = { performance: 1.4, totalBlockingTime: 1, seo: 1.1, accessibility: 1, 'best-practices': 1 };
 
+/**
+ * Calculates the metric score for a given site and metric.
+ *
+ * @param {Object} site - The site object containing audit results.
+ * @param {string} metric - The name of the metric to calculate (e.g., 'performance', 'seo').
+ * @returns {Object} An object containing the current metric score, the delta from the previous score,
+ * the percentage change, the previous score, and the weighted score based on predefined weights.
+ *
+ * @example
+ * // Returns metric information for the 'performance' metric of a site
+ * calculatePSIMetric(site, 'performance');
+ */
 function calculatePSIMetric(site, metric) {
   const current = site.audits[0].auditResult.scores;
   const previous = site.audits[0].previousAuditResult.scores;
@@ -43,6 +55,20 @@ function calculatePSIMetric(site, metric) {
     score: delta * SCORE_WEIGHTS[metric],
   }
 }
+
+/**
+ * Normalizes a delta TBT value based on the maximum absolute delta TBT observed.
+ *
+ * @param {number} deltaTBT - The delta TBT value to normalize.
+ * @param {number} minDeltaTBT - The minimum delta TBT observed in the dataset.
+ * @param {number} maxDeltaTBT - The maximum delta TBT observed in the dataset.
+ * @returns {number} The normalized delta TBT value.
+ *
+ * @example
+ * // Normalizes a delta TBT value of 100 ms
+ * normalizeDeltaTBT(100, -200, 300);
+ */
+
 function normalizeDeltaTBT(deltaTBT, minDeltaTBT, maxDeltaTBT) {
   const maxAbsDelta = Math.max(Math.abs(minDeltaTBT), Math.abs(maxDeltaTBT));
   if (maxAbsDelta === 0) {
@@ -51,6 +77,27 @@ function normalizeDeltaTBT(deltaTBT, minDeltaTBT, maxDeltaTBT) {
   return deltaTBT / maxAbsDelta;
 }
 
+/**
+ * Calculates the Total Blocking Time (TBT) metric for a given site, applying a logarithmic scoring algorithm.
+ * This function first calculates the delta TBT (the difference between current and previous TBT values),
+ * then normalizes this delta value based on the observed range across all sites. The normalized delta TBT
+ * is used to calculate a score that reflects the performance change.
+ *
+ * This score calculation is logarithmic in nature,
+ * meaning small changes in TBT result in smaller score changes, and larger TBT changes result in disproportionately
+ * larger score changes. This emphasizes significant performance variations. The final score is also weighted
+ * by a predefined factor for TBT to adjust its impact relative to other metrics.
+ *
+ * @param {Object} site - The site object containing TBT data in its audit results.
+ * @param {number} minDeltaTBT - The minimum delta TBT observed across all sites.
+ * @param {number} maxDeltaTBT - The maximum delta TBT observed across all sites.
+ * @returns {Object} An object containing the current TBT, normalized delta TBT, raw delta TBT,
+ * percentage change in TBT, previous TBT, and the weighted score based on predefined weights.
+ *
+ * @example
+ * // Returns TBT metric information for a site
+ * calculateTBTMetric(site, -200, 300);
+ */
 function calculateTBTMetric(site, minDeltaTBT, maxDeltaTBT) {
   const currentTBT = site.audits[0].auditResult.totalBlockingTime || 0;
   const previousTBT = site.audits[0].previousAuditResult.totalBlockingTime || 0;
@@ -75,6 +122,23 @@ function calculateTBTMetric(site, minDeltaTBT, maxDeltaTBT) {
   };
 }
 
+/**
+ * Processes an array of site objects to calculate and rank their scores based on various metrics including TBT.
+ * Each site's score is calculated for multiple metrics (e.g., performance, SEO, accessibility), and these scores are
+ * combined into a total score for each site. The TBT metric is specifically calculated using a logarithmic scoring method
+ * that emphasizes significant changes in TBT. The total score for each site includes the weighted TBT score along with
+ * scores for other metrics. The weighting factors for each metric can be adjusted to reflect their relative importance.
+ * The final step in the process is to sort the sites based on their total scores. This can be done in descending order
+ * (showing the 'winners' or best-performing sites first) or in ascending order, based on the 'showWinners' parameter.
+ *
+ * @param {Array} sites - An array of site objects to be scored and ranked.
+ * @param {boolean} showWinners - Flag to determine sorting order. If true, higher scores are ranked first.
+ * @returns {Array} A sorted array of site objects with calculated metrics, including individual metric scores and a total score.
+ *
+ * @example
+ * // Returns a sorted list of sites with calculated metrics
+ * calculateLeaderboardScores(sites, true);
+ */
 function calculateLeaderboardScores(sites, showWinners) {
   const deltaTBTValues = sites.map(site => {
     const currentTBT = site.audits[0].auditResult.totalBlockingTime || 0;

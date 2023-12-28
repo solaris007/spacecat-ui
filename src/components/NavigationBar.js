@@ -24,11 +24,11 @@ const NavigationBar = () => {
             <Image src={`${process.env.PUBLIC_URL}/spacecat_logo_50.webp`} alt="SpaceCat Logo" width="50px"/>
           </Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName(`${basePath}/`)} href="/">Dashboard</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/`)} href={`${basePath}/`}>Dashboard</Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName(`${basePath}/sites`)} href="/sites">Sites</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/sites`)} href={`${basePath}/sites`}>Sites</Link>
           <Divider size="S" orientation="vertical"/>
-          <Link UNSAFE_className={getLinkClassName(`${basePath}/audits`)} href="/audits">Audits</Link>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/audits`)} href={`${basePath}/audits`}>Audits</Link>
           <Divider size="S" orientation="vertical"/>
         </Flex>
         <View>

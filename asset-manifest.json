@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/spacecat-ui/static/css/main.480b8c18.css",
-    "main.js": "/spacecat-ui/static/js/main.12b8be25.js",
+    "main.js": "/spacecat-ui/static/js/main.1ce2c79e.js",
     "static/js/787.1ce3f89b.chunk.js": "/spacecat-ui/static/js/787.1ce3f89b.chunk.js",
     "index.html": "/spacecat-ui/index.html",
     "main.480b8c18.css.map": "/spacecat-ui/static/css/main.480b8c18.css.map",
-    "main.12b8be25.js.map": "/spacecat-ui/static/js/main.12b8be25.js.map",
+    "main.1ce2c79e.js.map": "/spacecat-ui/static/js/main.1ce2c79e.js.map",
     "787.1ce3f89b.chunk.js.map": "/spacecat-ui/static/js/787.1ce3f89b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.480b8c18.css",
-    "static/js/main.12b8be25.js"
+    "static/js/main.1ce2c79e.js"
   ]
 }

@@ -1,11 +1,8 @@
 import {
   ActionButton,
-  Divider,
   Flex,
   Grid,
   Heading,
-  Item,
-  Picker,
   ProgressCircle,
   Text,
   View,
@@ -14,24 +11,13 @@ import { ToastQueue } from '@react-spectrum/toast';
 import Edit from '@spectrum-icons/workflow/Edit';
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 
 import { getSitesForOrganization, getOrganization, updateOrganization } from '../service/apiService';
-import { formatDate, renderExternalLink } from '../utils/utils';
+import { formatDate } from '../utils/utils';
 
 import OrganizationFormDialog from './dialogs/OrganizationFormDialog';
 import ElementWithCopyAction from './content/ElementWithCopyAction';
 import AuthContext from '../auth/AuthContext';
-import AuditsTable from './tables/AuditsTable';
 import SitesTable from './tables/SitesTable';
 
 

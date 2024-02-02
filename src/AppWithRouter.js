@@ -9,6 +9,8 @@ import Audits from './components/pages/Audits';
 import AuthPrompt from './components/AuthPrompt';
 import AuthProvider from './auth/AuthProvider';
 import Footer from './components/Footer';
+import Organizations from './components/pages/Organizations';
+import OrganizationDetails from './components/OrganizationDetails';
 
 const AppWithRouter = () => {
   return (
@@ -20,6 +22,8 @@ const AppWithRouter = () => {
           <View>
             <Routes>
               <Route path="/" element={<Welcome/>}/>
+              <Route path="/organizations" element={<Organizations/>}/>
+              <Route path="/organizations/:organizationId" element={<OrganizationDetails/>}/>
               <Route path="/sites" element={<Sites/>}/>
               <Route path="/sites/:siteId" element={<SitesDetails/>}/>
               <Route path="/audits" element={<Audits/>}/>

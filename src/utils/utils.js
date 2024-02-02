@@ -3,7 +3,7 @@ import { ToastQueue } from '@react-spectrum/toast';
 import { Content, Heading, IllustratedMessage, Link } from '@adobe/react-spectrum';
 import { isValidUrl } from '@adobe/spacecat-shared-utils';
 
-export const AUDIT_TYPES = ['404', 'cwv', 'lhs-desktop', 'lhs-mobile'];
+export const AUDIT_TYPES = ['apex', 'broken-backlinks', '404', 'cwv', 'lhs-desktop', 'lhs-mobile'];
 const PSI_ERROR_MAP = {
   ERRORED_DOCUMENT_REQUEST: {
     messageFormat: 'Could not fetch the page (Status: {statusCode})',

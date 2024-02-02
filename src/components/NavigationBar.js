@@ -32,6 +32,8 @@ const NavigationBar = () => {
           <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName(`${basePath}/`)} onPress={() => handleNavigate('/')} href="#">Dashboard</Link>
           <Divider size="S" orientation="vertical"/>
+          <Link UNSAFE_className={getLinkClassName(`${basePath}/organizations`)} onPress={() => handleNavigate('/organizations')} href="#">Organizations</Link>
+          <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName(`${basePath}/sites`)} onPress={() => handleNavigate('/sites')} href="#">Sites</Link>
           <Divider size="S" orientation="vertical"/>
           <Link UNSAFE_className={getLinkClassName(`${basePath}/audits`)} onPress={() => handleNavigate('/audits')} href="#">Audits</Link>

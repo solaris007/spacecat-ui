@@ -1,5 +1,3 @@
-import { isAuditDisabled } from '../utils/siteUtils';
-
 const BASE_URL = 'https://spacecat.experiencecloud.live/api';
 
 const createHeaders = (apiKey) => ({
@@ -31,6 +29,26 @@ const fetchApi = async (url, options = {}) => {
     throw error;
   }
 };
+
+export const createOrganization = (organizationData) => fetchApi('organizations', {
+  method: 'POST',
+  body: JSON.stringify(organizationData),
+});
+
+export const getOrganization = (organizationId) => fetchApi(`organizations/${organizationId}`);
+
+export const getOrganizations = () => fetchApi('organizations');
+
+export const getSitesForOrganization = (organizationId) => fetchApi(`organizations/${organizationId}/sites`);
+
+export const updateOrganization = (organizationId, organizationData) => fetchApi(`organizations/${organizationId}`, {
+  method: 'PATCH',
+  body: JSON.stringify(organizationData),
+});
+
+export const deleteOrganization = (organizationId) => fetchApi(`organizations/${organizationId}`, {
+  method: 'DELETE',
+});
 
 export const getSites = () => fetchApi('sites');
 

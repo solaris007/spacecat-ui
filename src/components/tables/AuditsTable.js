@@ -65,7 +65,7 @@ function AuditsTable({ auditType, audits }) {
 
   return (
     <Flex direction="column" gap="size-100">
-      <Text>Showing ${audits.length} audits. Select two audits to compare them!</Text>
+      <Text>Showing {audits.length} audits. Select two audits to compare them!</Text>
       <ActionBarContainer height="size-3600">
         <TableView
           aria-label="Audit List"
